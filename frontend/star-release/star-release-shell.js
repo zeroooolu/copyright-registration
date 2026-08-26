@@ -16,4 +16,22 @@
   sidebar.setAttribute('aria-label','星球发行主导航');
   sidebar.innerHTML=`<div class="brand"><div class="brand-logo"><img src="https://star.kanjian.com/app/release/images/star-logo.png" alt="星球发行"></div></div><nav class="nav">${nav.map(([id,href,icon,label])=>`<a class="nav-item${id===active?' active':''}" href="${href}"${id===active?' aria-current="page"':''}><svg class="nav-icon" viewBox="0 0 24 24">${icon}</svg><span class="nav-label">${label}</span></a>`).join('')}</nav>`;
   topbar.innerHTML=`<div class="topbar-actions"><a class="topbar-action" href="#"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.8 9.2a2.4 2.4 0 1 1 4.6 1c-.35.8-1.1 1.2-1.7 1.7-.5.4-.7.9-.7 1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.1" r="1" fill="currentColor"/></svg><span>帮助中心</span></a><a class="topbar-action" href="#"><span>简体中文</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a><a class="topbar-action" href="#"><span>环环</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a></div>`;
+
+  const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  if(file==='index.html'){
+    const start=document.getElementById('continueBtn');
+    if(start){
+      start.addEventListener('click',()=>{
+        if(start.disabled)return;
+        const title=document.getElementById('selectedName')?.textContent?.trim()||'';
+        const meta=document.getElementById('selectedArtist')?.textContent?.trim()||'';
+        const parts=meta.split(' · ');
+        const artist=parts[0]||'';
+        const album=parts.slice(1).join(' · ');
+        const cover=document.querySelector('#selectedSong .selected-cover')?.textContent?.trim()||title.slice(0,1);
+        const p=new URLSearchParams({title,artist,album,cover});
+        location.href='registration-step1.html?'+p.toString();
+      });
+    }
+  }
 })();
