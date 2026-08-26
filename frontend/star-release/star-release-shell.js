@@ -33,6 +33,22 @@
         location.href='registration-step1.html?'+p.toString();
       });
     }
+
+    const demoStatuses={
+      '青花瓷':'pending_first_review',
+      '夜曲':'issued',
+      '晴天':'pending_payment',
+      '稻香':'draft'
+    };
+    document.querySelectorAll('.record-table tbody tr').forEach(row=>{
+      const name=row.querySelector('.work-title')?.textContent?.trim();
+      const meta=row.querySelector('.work-artist')?.textContent?.trim()||'';
+      const link=row.querySelector('.action-link');
+      if(!name||!link)return;
+      const parts=meta.split(' · ');
+      const q=new URLSearchParams({status:demoStatuses[name]||'pending_accept',title:name,artist:parts[0]||'',album:parts.slice(1).join(' · ')});
+      link.href='registration-detail.html?'+q.toString();
+    });
   }
 
   if(file==='registration-step1.html'){
