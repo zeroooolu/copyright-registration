@@ -36,19 +36,37 @@
     .card+.card{margin-top:16px}
 
     /* starter */
-    .starter-card{position:relative;overflow:visible;display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:280px;background:linear-gradient(105deg,#fff 0%,#fff 59%,#f4f7ff 100%)}
+    .starter-card{position:relative;overflow:visible;display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:338px;background:linear-gradient(105deg,#fff 0%,#fff 59%,#f4f7ff 100%)}
     .starter-main{padding:32px 34px 28px}
     .eyebrow{display:inline-flex;align-items:center;gap:7px;margin-bottom:11px;color:var(--brand);font-size:13px;font-weight:500}
     .eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 4px rgba(36,72,255,.10)}
     .starter-title{margin:0;color:var(--text-strong);font-size:24px;line-height:34px;font-weight:600;letter-spacing:-.02em}
     .starter-desc{max-width:790px;margin:8px 0 12px;color:var(--text-secondary);font-size:14px;line-height:22px}
-    .service-price{display:flex;align-items:baseline;gap:5px;margin:0 0 20px;color:#707784}
+    .service-price{display:flex;align-items:baseline;gap:5px;margin:0 0 16px;color:#707784}
     .price-label{margin-right:5px;font-size:12px;color:#737b87}
     .price-value{color:var(--brand);font-size:22px;line-height:28px;font-weight:700;letter-spacing:-.02em}
     .price-value small{font-size:13px;font-weight:600;margin-right:2px}
     .price-unit{font-size:12px;color:#7c8490}
     .price-divider{width:1px;height:12px;margin:0 6px;background:#dfe3ea;align-self:center}
     .price-tip{font-size:12px;color:#9aa1ab}
+
+    .prereq-box{max-width:800px;margin:0 0 16px;padding:11px 13px;background:#fafbff;border:1px solid #e3e7f5;border-radius:4px}
+    .prereq-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:9px}
+    .prereq-title{display:flex;align-items:center;gap:7px;color:#555d69;font-size:12px;font-weight:500}
+    .prereq-title svg{width:15px;height:15px;color:#737f95}
+    .prereq-tip{color:#9aa1ab;font-size:11px}
+    .prereq-list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .prereq-item{height:44px;display:flex;align-items:center;gap:9px;padding:0 10px;background:#fff;border:1px solid #e1e5ec;border-radius:4px;transition:.15s}
+    .prereq-icon{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:none;background:#fff7e8;color:var(--warning);border:1px solid #f3d6a5;font-size:11px;font-weight:700}
+    .prereq-copy{min-width:0;flex:1}
+    .prereq-name{color:#424954;font-size:12px;font-weight:500}
+    .prereq-state{margin-top:2px;color:#a1a7b0;font-size:11px}
+    .prereq-action{height:28px;padding:0 9px;border:1px solid #cfd7fa;border-radius:3px;background:#fff;color:var(--brand);font-size:11px}
+    .prereq-action:hover{background:#f5f7ff;border-color:#aebcff}
+    .prereq-item.done{border-color:#cfe9dc;background:#fbfffd}
+    .prereq-item.done .prereq-icon{background:#eaf8f1;border-color:#bce4d0;color:var(--success)}
+    .prereq-item.done .prereq-state{color:var(--success)}
+    .prereq-item.done .prereq-action{display:none}
 
     .search-line{display:flex;align-items:stretch;gap:10px;max-width:800px}
     .search-wrap{position:relative;flex:1;min-width:0}
@@ -154,6 +172,28 @@
             <span class="price-tip">支付成功后提交申请</span>
           </div>
 
+          <div class="prereq-box">
+            <div class="prereq-head">
+              <div class="prereq-title">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5.5c0 4.8-3.2 8-8 9.5-4.8-1.5-8-4.7-8-9.5V6l8-3Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m8.5 12 2.2 2.2 4.8-5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>开始登记前需完成</span>
+              </div>
+              <span class="prereq-tip">完成以下两项后即可开始登记</span>
+            </div>
+            <div class="prereq-list">
+              <div class="prereq-item" id="verifyItem">
+                <span class="prereq-icon">!</span>
+                <div class="prereq-copy"><div class="prereq-name">实名认证</div><div class="prereq-state">未完成</div></div>
+                <button class="prereq-action" id="verifyBtn" type="button">去认证</button>
+              </div>
+              <div class="prereq-item" id="contractItem">
+                <span class="prereq-icon">!</span>
+                <div class="prereq-copy"><div class="prereq-name">合同签约</div><div class="prereq-state">未完成</div></div>
+                <button class="prereq-action" id="contractBtn" type="button">去签约</button>
+              </div>
+            </div>
+          </div>
+
           <div class="search-line">
             <div class="search-wrap">
               <div class="search-box" id="searchBox">
@@ -251,7 +291,7 @@
     </div>
   </main>
 
-  <div class="toast" id="toast">已选择作品，下一步将进入登记信息确认页</div>
+  <div class="toast" id="toast"></div>
 
   <script src="star-release-shell.js"></script>
   <script>
@@ -266,6 +306,43 @@
       const continueBtn=document.getElementById('continueBtn');
       const toast=document.getElementById('toast');
       const results=[...document.querySelectorAll('.search-result')];
+      const verifyItem=document.getElementById('verifyItem');
+      const contractItem=document.getElementById('contractItem');
+      const verifyBtn=document.getElementById('verifyBtn');
+      const contractBtn=document.getElementById('contractBtn');
+
+      let verified=false;
+      let contracted=false;
+
+      const showToast=(message)=>{
+        toast.textContent=message;
+        toast.classList.add('show');
+        clearTimeout(showToast.timer);
+        showToast.timer=setTimeout(()=>toast.classList.remove('show'),1800);
+      };
+
+      const updateContinueState=()=>{
+        const hasSong=selected.classList.contains('show');
+        continueBtn.disabled=!(hasSong&&verified&&contracted);
+      };
+
+      const completePrereq=(item,label)=>{
+        item.classList.add('done');
+        item.querySelector('.prereq-icon').textContent='✓';
+        item.querySelector('.prereq-state').textContent='已完成';
+        showToast(label+'已完成');
+        updateContinueState();
+      };
+
+      verifyBtn.addEventListener('click',()=>{
+        verified=true;
+        completePrereq(verifyItem,'实名认证');
+      });
+
+      contractBtn.addEventListener('click',()=>{
+        contracted=true;
+        completePrereq(contractItem,'合同签约');
+      });
 
       const showDropdown=()=>{ if(!selected.classList.contains('show')) dropdown.classList.add('show'); };
       input.addEventListener('focus',showDropdown);
@@ -287,7 +364,7 @@
         input.style.display='none';
         selected.classList.add('show');
         dropdown.classList.remove('show');
-        continueBtn.disabled=false;
+        updateContinueState();
       }));
 
       clear.addEventListener('click',e=>{
@@ -295,19 +372,20 @@
         selected.classList.remove('show');
         input.style.display='block';
         input.value='';
-        continueBtn.disabled=true;
+        updateContinueState();
         input.focus();
       });
 
       continueBtn.addEventListener('click',()=>{
         if(continueBtn.disabled)return;
-        toast.classList.add('show');
-        setTimeout(()=>toast.classList.remove('show'),2200);
+        showToast('前置条件已满足，下一步进入登记信息填写页');
       });
 
       document.addEventListener('click',e=>{
         if(!e.target.closest('.search-wrap')) dropdown.classList.remove('show');
       });
+
+      updateContinueState();
     })();
   </script>
 </body>
