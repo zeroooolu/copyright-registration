@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>填写登记信息｜著作权登记｜星球发行</title>
+  <link rel="stylesheet" href="star-release-shell.css" />
+  <style>
+    :root{--brand:#2448ff;--brand-hover:#1839e8;--brand-soft:#eef2ff;--page-bg:#f4f6f9;--surface:#fff;--text:#30343a;--strong:#20232a;--muted:#737b87;--light:#9aa1ab;--border:#dfe3ea;--soft-border:#eaedf2;--success:#20a66a;--warning:#e89b27;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Arial,sans-serif}
+    *{box-sizing:border-box}html,body{margin:0;min-width:1160px;background:var(--page-bg);color:var(--text);font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}svg{display:block}
+    .page{padding:0 24px 48px}.page-head{height:82px;display:flex;align-items:center;justify-content:space-between}.back{display:inline-flex;align-items:center;gap:7px;color:#727b88;font-size:13px}.back:hover{color:var(--brand)}.page-title{margin:0;font-size:21px;color:var(--strong);font-weight:600}.page-sub{margin:5px 0 0;color:#9098a4;font-size:12px}
+    .progress{display:flex;align-items:center;gap:0}.progress-step{display:flex;align-items:center;color:#9ba2ad;font-size:12px}.progress-step:not(:last-child):after{content:"";width:54px;height:1px;margin:0 10px;background:#d9dee7}.progress-num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;margin-right:7px;background:#fff;border:1px solid #d7dce5;color:#8c94a0;font-size:11px}.progress-step.active{color:var(--brand);font-weight:500}.progress-step.active .progress-num{background:var(--brand);border-color:var(--brand);color:#fff}
+    .layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}.main{min-width:0}.card{background:#fff;border:1px solid var(--border);border-radius:6px;margin-bottom:16px;overflow:hidden}.card-head{min-height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid var(--soft-border)}.card-title{font-size:16px;color:var(--strong);font-weight:600}.card-note{margin-top:4px;color:#9aa1ab;font-size:11px}.card-body{padding:22px}
+    .song-box{display:flex;align-items:center;gap:14px;padding:14px;background:#f8f9fb;border:1px solid #e6e9ee;border-radius:5px;margin-bottom:22px}.cover{width:54px;height:54px;border-radius:5px;display:grid;place-items:center;color:#fff;font-size:18px;font-weight:600;background:linear-gradient(135deg,#6476ea,#9b78d5)}.song-copy{min-width:0;flex:1}.song-name{font-size:15px;font-weight:600;color:var(--strong)}.song-meta{margin-top:6px;color:#8b939e;font-size:12px}.song-tag{height:24px;display:inline-flex;align-items:center;padding:0 8px;border-radius:3px;background:#eef2ff;color:var(--brand);font-size:11px}
+    .sub-title{margin:0 0 10px;color:#4b535e;font-size:13px;font-weight:600}.req{color:#e25353;margin-left:2px}.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}.type-card{position:relative;display:block;padding:16px 16px 15px;border:1px solid #dce1e8;border-radius:5px;background:#fff;cursor:pointer;transition:.15s}.type-card:hover{border-color:#bfc9fb}.type-card.selected{border-color:var(--brand);background:#f8f9ff;box-shadow:0 0 0 1px rgba(36,72,255,.05)}.type-check{position:absolute;right:12px;top:12px;width:18px;height:18px;border:1px solid #cbd1db;border-radius:3px;background:#fff;display:grid;place-items:center;color:#fff;font-size:12px}.type-card.selected .type-check{background:var(--brand);border-color:var(--brand)}.type-name{padding-right:30px;color:#313844;font-size:14px;font-weight:600}.type-desc{margin-top:6px;color:#89919d;font-size:12px;line-height:19px}.type-price{margin-top:13px;color:#5d6571;font-size:12px}.type-price strong{color:var(--brand);font-size:18px;margin-right:2px}.type-price span{color:#9aa1ab}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}.field.full{grid-column:1/-1}.label{display:block;margin-bottom:8px;color:#555d68;font-size:12px}.control{width:100%;height:40px;border:1px solid #d6dbe3;border-radius:4px;background:#fff;padding:0 11px;color:#343b45;outline:none}.control:focus{border-color:var(--brand);box-shadow:0 0 0 2px rgba(36,72,255,.06)}.control[readonly],.control:disabled{background:#f5f6f8;color:#777f8a;border-color:#e1e4e9;cursor:not-allowed}.inline{display:flex;gap:8px}.inline .control{flex:1;min-width:0}.radio-group{height:40px;display:flex;align-items:center;gap:20px}.radio{display:flex;align-items:center;gap:7px;color:#555d68;font-size:13px}.radio input{accent-color:var(--brand)}
+    .rich{border:1px solid #d6dbe3;border-radius:4px;background:#fff;overflow:hidden}.toolbar{height:34px;display:flex;align-items:center;gap:2px;padding:0 8px;background:#fafbfc;border-bottom:1px solid #e7eaf0}.tool{min-width:27px;height:25px;border:0;background:transparent;color:#737b87;border-radius:3px;font-size:12px}.tool:hover{background:#eef1f5}.rich textarea{width:100%;min-height:92px;padding:10px 12px;border:0;resize:vertical;outline:none;color:#404751;line-height:1.65}.rich textarea::placeholder{color:#adb3bc}.helper{margin-top:6px;color:#9da4ae;font-size:11px;line-height:18px}
+    .identity-hint{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;margin-bottom:18px;border:1px solid #dde4ff;background:#f7f9ff;border-radius:4px;color:#6f7888;font-size:11px;line-height:18px}.identity-hint svg{width:16px;height:16px;flex:none;color:var(--brand);margin-top:1px}.locked{display:inline-flex;align-items:center;gap:4px;margin-left:6px;color:#9aa1ab;font-size:10px;font-weight:400}.locked svg{width:11px;height:11px}
+    .author-table{width:100%;border-collapse:collapse;border:1px solid #e3e7ed;border-radius:5px;overflow:hidden}.author-table th{height:38px;padding:0 12px;background:#f8f9fb;color:#7b838f;font-size:11px;font-weight:500;text-align:left;border-bottom:1px solid #e3e7ed}.author-table td{padding:11px 12px;border-bottom:1px solid #edf0f4}.author-table tr:last-child td{border-bottom:0}.mini-input,.mini-select{width:100%;height:34px;padding:0 9px;border:1px solid #d8dde5;border-radius:3px;background:#fff;color:#434a54}.mini-input[readonly]{background:#f6f7f9;color:#777f89}.source-tag{display:inline-flex;margin-left:6px;height:20px;align-items:center;padding:0 6px;background:#eef2ff;color:var(--brand);border-radius:2px;font-size:10px}.table-action{color:var(--brand);font-size:12px;white-space:nowrap}.add-author{margin-top:12px;height:34px;padding:0 12px;border:1px dashed #cfd5df;background:#fff;border-radius:4px;color:#657080;font-size:12px}.add-author:hover{color:var(--brand);border-color:#aebcff}
+    .side{position:sticky;top:108px}.summary{background:#fff;border:1px solid var(--border);border-radius:6px;overflow:hidden}.summary-head{padding:18px 18px 14px;border-bottom:1px solid #edf0f3;font-size:14px;font-weight:600;color:#343b45}.summary-body{padding:16px 18px}.summary-song{display:flex;gap:10px;align-items:center;padding-bottom:14px;border-bottom:1px solid #edf0f3}.summary-cover{width:38px;height:38px;border-radius:4px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#6476ea,#9b78d5);font-weight:600}.summary-song strong{display:block;color:#303741;font-size:12px}.summary-song span{display:block;margin-top:4px;color:#9aa1ab;font-size:11px}.summary-line{display:flex;align-items:center;justify-content:space-between;margin-top:13px;color:#707986;font-size:12px}.summary-line strong{color:#3a414b;font-weight:500}.summary-price{display:flex;align-items:baseline;justify-content:space-between;margin-top:16px;padding-top:15px;border-top:1px solid #edf0f3}.summary-price span{color:#626b76;font-size:12px}.summary-price strong{color:var(--brand);font-size:25px}.summary-price small{font-size:12px;margin-right:2px}.next{width:100%;height:44px;margin-top:16px;border:1px solid var(--brand);border-radius:4px;background:var(--brand);color:#fff;font-weight:500}.next:hover{background:var(--brand-hover)}.save{width:100%;height:38px;margin-top:9px;border:1px solid #d8dde5;border-radius:4px;background:#fff;color:#606975}.side-note{margin-top:12px;padding:12px 14px;background:#fff;border:1px solid var(--border);border-radius:6px;color:#939aa5;font-size:11px;line-height:19px}
+    .toast{position:fixed;left:50%;top:28px;z-index:100;display:none;transform:translateX(-50%);padding:10px 18px;border-radius:4px;background:#30343a;color:#fff;box-shadow:0 5px 16px rgba(0,0,0,.16)}.toast.show{display:block}
+    @media(max-width:1250px){.layout{grid-template-columns:minmax(0,1fr) 280px}.page{padding-left:18px;padding-right:18px}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <header class="topbar"></header>
+  <main class="workspace"><div class="page">
+    <div class="page-head">
+      <div><a class="back" href="index.html">← 返回著作权登记</a><h1 class="page-title">填写登记信息</h1><p class="page-sub">请补充本次登记所需的作品、著作权人和作者信息。</p></div>
+      <div class="progress">
+        <div class="progress-step active"><span class="progress-num">1</span>填写信息</div>
+        <div class="progress-step"><span class="progress-num">2</span>签署授权</div>
+        <div class="progress-step"><span class="progress-num">3</span>支付并提交</div>
+      </div>
+    </div>
+
+    <div class="layout">
+      <div class="main">
+        <section class="card">
+          <div class="card-head"><div><div class="card-title">作品信息</div><div class="card-note">确认登记作品，并补充作品创作与发表信息。</div></div></div>
+          <div class="card-body">
+            <div class="song-box">
+              <div class="cover" id="songCover">晴</div>
+              <div class="song-copy"><div class="song-name" id="songName">晴天</div><div class="song-meta" id="songMeta">周杰伦 · 叶惠美</div></div>
+              <span class="song-tag">已从星球发行选择</span>
+            </div>
+
+            <div class="sub-title">选择要登记的内容<span class="req">*</span></div>
+            <div class="type-grid">
+              <label class="type-card selected" data-type="composition">
+                <input type="checkbox" checked hidden />
+                <span class="type-check">✓</span>
+                <div class="type-name">登记词曲的著作权</div>
+                <div class="type-desc">登记这首歌曲的词、曲创作成果，适合词作者、曲作者或相应著作权人。</div>
+                <div class="type-price"><strong>¥9.9</strong><span>/ 次</span></div>
+              </label>
+              <label class="type-card" data-type="recording">
+                <input type="checkbox" hidden />
+                <span class="type-check"></span>
+                <div class="type-name">登记录音的著作权</div>
+                <div class="type-desc">登记当前歌曲的具体录音版本，适合录音制作者或相应权利人。</div>
+                <div class="type-price"><strong>¥9.9</strong><span>/ 次</span></div>
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <div class="field"><label class="label">创作完成地点<span class="req">*</span></label><select class="control"><option>上海市</option><option>北京市</option><option>广东省</option><option>浙江省</option><option>江苏省</option><option>四川省</option></select></div>
+              <div class="field"><label class="label">创作完成日期<span class="req">*</span></label><input class="control" type="date" value="2003-06-12" /></div>
+              <div class="field"><label class="label">发表状态<span class="req">*</span></label><div class="radio-group"><label class="radio"><input type="radio" name="published" value="no" />未发表</label><label class="radio"><input type="radio" name="published" value="yes" checked />已发表</label></div></div>
+              <div class="field published-field"><label class="label">首次发表日期<span class="req">*</span></label><input class="control" type="date" value="2003-07-31" /></div>
+              <div class="field published-field"><label class="label">首次发表地点<span class="req">*</span></label><select class="control"><option>台湾省</option><option>上海市</option><option>北京市</option><option>广东省</option><option>浙江省</option></select></div>
+              <div class="field full"><label class="label">作品独创性<span class="req">*</span></label><div class="rich"><div class="toolbar"><button class="tool" type="button"><b>B</b></button><button class="tool" type="button"><i>I</i></button><button class="tool" type="button">• 列表</button></div><textarea placeholder="请说明作品在歌词、旋律、结构、编配等方面具有独创性的内容。"></textarea></div><div class="helper">建议简要说明作品区别于已有作品的原创表达。</div></div>
+              <div class="field full"><label class="label">创作过程<span class="req">*</span></label><div class="rich"><div class="toolbar"><button class="tool" type="button"><b>B</b></button><button class="tool" type="button"><i>I</i></button><button class="tool" type="button">• 列表</button></div><textarea placeholder="请简要说明从构思、创作到完成作品的过程。"></textarea></div></div>
+              <div class="field full"><label class="label">创作目的<span class="req">*</span></label><div class="rich"><div class="toolbar"><button class="tool" type="button"><b>B</b></button><button class="tool" type="button"><i>I</i></button><button class="tool" type="button">• 列表</button></div><textarea placeholder="请简要说明创作本作品的目的。"></textarea></div></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><div><div class="card-title">著作权人信息</div><div class="card-note">部分信息已根据你的签约主体和实名认证资料自动填写。</div></div></div>
+          <div class="card-body">
+            <div class="identity-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 10v6M12 7h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>名称、主体类别、证件类型和证件号码来自当前账号的实名认证/签约信息，为保证登记主体一致，当前不可修改。</span></div>
+            <div class="form-grid">
+              <div class="field"><label class="label">名称<span class="locked"><svg viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>实名信息</span></label><input class="control" value="看见音乐（上海）有限公司" readonly /></div>
+              <div class="field"><label class="label">类别<span class="locked">实名信息</span></label><input class="control" value="法人 / 其他组织" readonly /></div>
+              <div class="field"><label class="label">证件类型<span class="locked">实名信息</span></label><input class="control" value="统一社会信用代码" readonly /></div>
+              <div class="field"><label class="label">证件号码<span class="locked">实名信息</span></label><input class="control" value="9131**********8X" readonly /></div>
+              <div class="field full"><label class="label">省 / 市 / 区<span class="req">*</span></label><div class="inline"><select class="control"><option>上海市</option></select><select class="control"><option>上海市</option></select><select class="control"><option>徐汇区</option><option>静安区</option><option>浦东新区</option></select></div></div>
+              <div class="field full"><label class="label">详细地址<span class="req">*</span></label><input class="control" value="龙腾大道2879号3楼" /></div>
+              <div class="field"><label class="label">联系人<span class="req">*</span></label><input class="control" value="张三" /></div>
+              <div class="field"><label class="label">手机号<span class="req">*</span></label><input class="control" value="138****8888" /></div>
+              <div class="field"><label class="label">邮箱<span class="req">*</span></label><input class="control" type="email" value="copyright@example.com" /></div>
+              <div class="field"><label class="label">邮编</label><input class="control" value="200232" /></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><div><div class="card-title">作者信息</div><div class="card-note">已从作品的词曲作者信息中带入，可核对并补充证件信息。</div></div><button class="add-author" type="button" id="addAuthor">+ 添加作者</button></div>
+          <div class="card-body">
+            <table class="author-table">
+              <thead><tr><th style="width:19%">作者名称</th><th style="width:15%">作者身份</th><th style="width:20%">证件类型</th><th style="width:29%">证件号码</th><th style="width:17%">操作</th></tr></thead>
+              <tbody id="authorBody">
+                <tr><td><input class="mini-input" value="方文山" /><span class="source-tag">作品带入</span></td><td><select class="mini-select"><option>作词</option><option>作曲</option></select></td><td><select class="mini-select"><option>居民身份证</option><option>护照</option></select></td><td><input class="mini-input" value="310***********1234" /></td><td><a class="table-action" href="#">删除</a></td></tr>
+                <tr><td><input class="mini-input" value="周杰伦" /><span class="source-tag">作品带入</span></td><td><select class="mini-select"><option>作曲</option><option>作词</option></select></td><td><select class="mini-select"><option>居民身份证</option><option>护照</option></select></td><td><input class="mini-input" value="A12******8" /></td><td><a class="table-action" href="#">删除</a></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <aside class="side">
+        <section class="summary">
+          <div class="summary-head">本次登记</div>
+          <div class="summary-body">
+            <div class="summary-song"><div class="summary-cover" id="summaryCover">晴</div><div><strong id="summarySong">晴天</strong><span id="summaryMeta">周杰伦 · 叶惠美</span></div></div>
+            <div class="summary-line"><span>登记项目</span><strong id="typeCount">1 项</strong></div>
+            <div class="summary-line"><span>单项服务费</span><strong>¥9.9</strong></div>
+            <div class="summary-price"><span>合计</span><strong><small>¥</small><span id="totalPrice">9.9</span></strong></div>
+            <button class="next" id="nextBtn" type="button">下一步：签署授权</button>
+            <button class="save" id="saveBtn" type="button">保存草稿</button>
+          </div>
+        </section>
+        <div class="side-note">系统会自动保存部分已填写信息。下一步进入授权签署，本页信息仍可返回修改。</div>
+      </aside>
+    </div>
+  </div></main>
+
+  <div class="toast" id="toast"></div>
+  <script src="star-release-shell.js"></script>
+  <script>
+    (()=>{
+      const params=new URLSearchParams(location.search);
+      const name=params.get('title')||'晴天';
+      const artist=params.get('artist')||'周杰伦';
+      const album=params.get('album')||'叶惠美';
+      const cover=params.get('cover')||name.slice(0,1);
+      document.getElementById('songName').textContent=name;
+      document.getElementById('songMeta').textContent=artist+' · '+album;
+      document.getElementById('songCover').textContent=cover;
+      document.getElementById('summarySong').textContent=name;
+      document.getElementById('summaryMeta').textContent=artist+' · '+album;
+      document.getElementById('summaryCover').textContent=cover;
+
+      const cards=[...document.querySelectorAll('.type-card')];
+      const total=document.getElementById('totalPrice');
+      const count=document.getElementById('typeCount');
+      const toast=document.getElementById('toast');
+      const published=[...document.querySelectorAll('input[name="published"]')];
+      const publishedFields=[...document.querySelectorAll('.published-field')];
+      const showToast=msg=>{toast.textContent=msg;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),1800)};
+      const updatePrice=()=>{
+        const selected=cards.filter(c=>c.classList.contains('selected')).length;
+        count.textContent=selected+' 项';
+        total.textContent=(selected*9.9).toFixed(1);
+        document.getElementById('nextBtn').disabled=selected===0;
+      };
+      cards.forEach(card=>card.addEventListener('click',e=>{
+        e.preventDefault();
+        card.classList.toggle('selected');
+        card.querySelector('.type-check').textContent=card.classList.contains('selected')?'✓':'';
+        card.querySelector('input').checked=card.classList.contains('selected');
+        updatePrice();
+      }));
+      published.forEach(r=>r.addEventListener('change',()=>{
+        const isPublished=document.querySelector('input[name="published"]:checked').value==='yes';
+        publishedFields.forEach(f=>f.style.display=isPublished?'block':'none');
+      }));
+      document.getElementById('saveBtn').addEventListener('click',()=>showToast('草稿已保存'));
+      document.getElementById('nextBtn').addEventListener('click',()=>showToast('下一步将进入授权签署页'));
+      document.getElementById('addAuthor').addEventListener('click',()=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td><input class="mini-input" placeholder="作者姓名" /></td><td><select class="mini-select"><option>作词</option><option>作曲</option></select></td><td><select class="mini-select"><option>居民身份证</option><option>护照</option></select></td><td><input class="mini-input" placeholder="请输入证件号码" /></td><td><a class="table-action" href="#">删除</a></td>';
+        document.getElementById('authorBody').appendChild(tr);
+      });
+      document.getElementById('authorBody').addEventListener('click',e=>{if(e.target.matches('.table-action')){e.preventDefault();e.target.closest('tr').remove();showToast('已删除作者')}});
+      updatePrice();
+    })();
+  </script>
+</body>
+</html>
