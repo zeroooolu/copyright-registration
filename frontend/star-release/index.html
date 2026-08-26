@@ -36,12 +36,19 @@
     .card+.card{margin-top:16px}
 
     /* starter */
-    .starter-card{position:relative;overflow:visible;display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:258px;background:linear-gradient(105deg,#fff 0%,#fff 59%,#f4f7ff 100%)}
+    .starter-card{position:relative;overflow:visible;display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:280px;background:linear-gradient(105deg,#fff 0%,#fff 59%,#f4f7ff 100%)}
     .starter-main{padding:32px 34px 28px}
     .eyebrow{display:inline-flex;align-items:center;gap:7px;margin-bottom:11px;color:var(--brand);font-size:13px;font-weight:500}
     .eyebrow-dot{width:7px;height:7px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 4px rgba(36,72,255,.10)}
     .starter-title{margin:0;color:var(--text-strong);font-size:24px;line-height:34px;font-weight:600;letter-spacing:-.02em}
-    .starter-desc{max-width:760px;margin:8px 0 22px;color:var(--text-secondary);font-size:14px;line-height:22px}
+    .starter-desc{max-width:790px;margin:8px 0 12px;color:var(--text-secondary);font-size:14px;line-height:22px}
+    .service-price{display:flex;align-items:baseline;gap:5px;margin:0 0 20px;color:#707784}
+    .price-label{margin-right:5px;font-size:12px;color:#737b87}
+    .price-value{color:var(--brand);font-size:22px;line-height:28px;font-weight:700;letter-spacing:-.02em}
+    .price-value small{font-size:13px;font-weight:600;margin-right:2px}
+    .price-unit{font-size:12px;color:#7c8490}
+    .price-divider{width:1px;height:12px;margin:0 6px;background:#dfe3ea;align-self:center}
+    .price-tip{font-size:12px;color:#9aa1ab}
 
     .search-line{display:flex;align-items:stretch;gap:10px;max-width:800px}
     .search-wrap{position:relative;flex:1;min-width:0}
@@ -138,7 +145,14 @@
         <div class="starter-main">
           <div class="eyebrow"><span class="eyebrow-dot"></span>著作权登记</div>
           <h1 class="starter-title">为我的音乐提交一般作品著作权登记</h1>
-          <p class="starter-desc">选择你在星球发行中的音乐作品，确认作品信息并提交登记申请，后续办理进度可随时查看。</p>
+          <p class="starter-desc">选择你在星球发行中的音乐作品，确认作品信息并在线完成授权与支付。本服务为付费登记服务，提交后可随时查看办理进度。</p>
+          <div class="service-price">
+            <span class="price-label">一般作品著作权登记</span>
+            <strong class="price-value"><small>¥</small>9.9</strong>
+            <span class="price-unit">/ 次</span>
+            <span class="price-divider"></span>
+            <span class="price-tip">支付成功后提交申请</span>
+          </div>
 
           <div class="search-line">
             <div class="search-wrap">
@@ -184,7 +198,7 @@
           <div class="side-title">完成登记，只需几步</div>
           <div class="flow-step"><span class="step-num">1</span><div class="step-copy"><strong>选择作品并确认信息</strong><span>自动读取已有作品资料</span></div></div>
           <div class="flow-step"><span class="step-num">2</span><div class="step-copy"><strong>签署登记授权</strong><span>通过手机扫码在线完成</span></div></div>
-          <div class="flow-step"><span class="step-num">3</span><div class="step-copy"><strong>支付并提交申请</strong><span>提交后可持续查看办理进度</span></div></div>
+          <div class="flow-step"><span class="step-num">3</span><div class="step-copy"><strong>支付 ¥9.9 并提交申请</strong><span>支付成功后进入登记办理</span></div></div>
         </aside>
       </section>
 
