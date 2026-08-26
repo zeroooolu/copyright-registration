@@ -34,4 +34,26 @@
       });
     }
   }
+
+  if(file==='registration-step1.html'){
+    const next=document.getElementById('nextBtn');
+    if(next){
+      next.addEventListener('click',e=>{
+        if(next.disabled)return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const p=new URLSearchParams(location.search);
+        const title=p.get('title')||document.getElementById('songName')?.textContent?.trim()||'晴天';
+        const meta=document.getElementById('songMeta')?.textContent?.trim()||'';
+        const parts=meta.split(' · ');
+        const artist=p.get('artist')||parts[0]||'';
+        const album=p.get('album')||parts.slice(1).join(' · ');
+        const cover=p.get('cover')||document.getElementById('songCover')?.textContent?.trim()||title.slice(0,1);
+        const types=[...document.querySelectorAll('.type-card.selected')].map(card=>card.dataset.type).filter(Boolean);
+        const amount=(types.length*9.9).toFixed(1);
+        const q=new URLSearchParams({title,artist,album,cover,types:types.join(','),amount});
+        location.href='registration-step2.html?'+q.toString();
+      },true);
+    }
+  }
 })();
