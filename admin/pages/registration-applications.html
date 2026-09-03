@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>登记申请｜星球发行 · 著作权登记 Admin</title>
+<link rel="stylesheet" href="../assets/css/admin-common.css"><link rel="stylesheet" href="../assets/css/registration-admin.css">
+</head>
+<body data-admin-page="applications" data-page-title="登记申请">
+<div id="admin-shell"></div>
+<template id="page-content">
+  <div class="page-header"><div><h1>登记申请</h1><p>统一管理用户自助登记与后台批量登记产生的单条登记申请。</p></div></div>
+  <section class="ra-toolbar">
+    <div class="ra-field"><label>作品名称</label><input class="ra-input" id="work" placeholder="输入关键词搜索"></div>
+    <div class="ra-field"><label>CP 名称</label><input class="ra-input" id="cp" placeholder="输入关键词搜索"></div>
+    <div class="ra-field"><label>申请人</label><input class="ra-input" id="applicant" placeholder="输入关键词搜索"></div>
+    <div class="ra-field"><label>登记类型</label><select class="ra-select" id="type"><option value="all">全部</option><option value="recording">录音制品</option><option value="composition">词曲作品</option></select></div>
+    <div class="ra-field"><label>来源</label><select class="ra-select" id="source"><option value="all">全部</option><option value="self">用户自助</option><option value="batch">后台批量</option></select></div>
+    <div class="ra-field"><label>状态</label><select class="ra-select" id="status"><option value="all">全部</option><option value="pending_accept">待受理</option><option value="pending_supplement">待补证</option><option value="pending_registration">待登记</option><option value="pending_first_review">待初审</option><option value="pending_re_review">待复审</option><option value="pending_certificate">待制证</option><option value="issued">已发证</option><option value="failed">失败</option></select></div>
+    <div class="ra-actions"><button class="ra-btn" id="reset">重置</button><button class="ra-btn primary" id="query">查询</button></div>
+  </section>
+  <div style="margin-bottom:14px"><button class="ra-btn primary" id="batchAdd">批量新增</button></div>
+  <section class="ra-card">
+    <table class="ra-table"><colgroup><col style="width:12%"><col style="width:15%"><col style="width:14%"><col style="width:18%"><col style="width:10%"><col style="width:9%"><col style="width:8%"><col style="width:8%"><col style="width:6%"></colgroup>
+      <thead><tr><th>提交时间</th><th>申请编号 / 登记 ID</th><th>作品名称</th><th>CP / 申请人</th><th>登记类型</th><th>来源</th><th>代理人</th><th>状态</th><th>操作</th></tr></thead><tbody id="tbody"></tbody>
+    </table>
+    <div class="ra-footer"><span id="result"></span><div class="ra-pager"><button class="ra-page">‹</button><button class="ra-page active">1</button><button class="ra-page">›</button></div></div>
+  </section>
+</template>
+<script src="../assets/js/admin-shell.js"></script>
+<script>
+const rows=[
+{id:'CR202609030001',rid:'—',time:'2026-09-03 16:20:18',work:'晴天',cp:'看见音乐（上海）有限公司',applicant:'看见音乐（上海）有限公司',type:'recording',typeName:'录音制品',source:'self',agent:'看见音乐',status:'pending_first_review',statusName:'待初审'},
+{id:'CR202609030002',rid:'—',time:'2026-09-03 16:20:18',work:'晴天',cp:'看见音乐（上海）有限公司',applicant:'看见音乐（上海）有限公司',type:'composition',typeName:'词曲作品',source:'self',agent:'看见音乐',status:'pending_supplement',statusName:'待补证'},
+{id:'CR202609030003',rid:'5650902849421523',time:'2026-09-03 17:07:11',work:'溺空',cp:'姚晓雄',applicant:'姚晓雄',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_accept',statusName:'待受理'},
+{id:'CR202608270021',rid:'5641044037206017',time:'2026-08-27 18:04:34',work:'青苔经过晨岸',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_registration',statusName:'待登记'},
+{id:'CR202608270022',rid:'5641043835879516',time:'2026-08-27 18:04:34',work:'山寺初有春水',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_registration',statusName:'待登记'},
+{id:'CR202608270023',rid:'5641043634552914',time:'2026-08-27 18:04:34',work:'轻盈田野装满橘光',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_registration',statusName:'待登记'},
+{id:'CR202608270024',rid:'5641043450003527',time:'2026-08-27 18:04:34',work:'潮声与窗灯',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_registration',statusName:'待登记'},
+{id:'CR202608270025',rid:'5641043248677038',time:'2026-08-27 18:04:34',work:'悠长花火沉入塔影',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'pending_re_review',statusName:'待复审'},
+{id:'CR202608270026',rid:'5641043064127615',time:'2026-08-27 18:04:34',work:'蔷薇写给长街',cp:'欢唱网络科技（上海）有限公司',applicant:'欢唱网络科技（上海）有限公司',type:'recording',typeName:'录音制品',source:'batch',agent:'欢唱',status:'issued',statusName:'已发证'},
+{id:'CR202609030004',rid:'—',time:'2026-09-03 17:18:17',work:'溺空',cp:'姚晓雄',applicant:'姚晓雄',type:'recording',typeName:'录音制品',source:'batch',agent:'库音',status:'failed',statusName:'失败'}
+];
+const badge=s=>({pending_accept:'orange',pending_supplement:'red',pending_registration:'blue',pending_first_review:'blue',pending_re_review:'blue',pending_certificate:'blue',issued:'green',failed:'red'}[s]||'gray');
+const $=id=>document.getElementById(id),tbody=$('tbody');
+function render(){const w=$('work').value.trim().toLowerCase(),cp=$('cp').value.trim().toLowerCase(),a=$('applicant').value.trim().toLowerCase(),t=$('type').value,src=$('source').value,st=$('status').value;const list=rows.filter(x=>(!w||x.work.toLowerCase().includes(w))&&(!cp||x.cp.toLowerCase().includes(cp))&&(!a||x.applicant.toLowerCase().includes(a))&&(t==='all'||x.type===t)&&(src==='all'||x.source===src)&&(st==='all'||x.status===st));tbody.innerHTML=list.map(x=>`<tr><td>${x.time}</td><td><div class="ra-main">${x.id}</div><div class="ra-sub">登记 ID：${x.rid}</div></td><td><div class="ra-main">${x.work}</div>${x.source==='self'?'<div class="ra-sub">同次提交 · CRSUB202609030001</div>':''}</td><td><div>${x.cp}</div><div class="ra-sub">申请人：${x.applicant}</div></td><td>${x.typeName}</td><td><span class="ra-tag ${x.source==='self'?'source-self':'source-old'}">${x.source==='self'?'用户自助':'后台批量'}</span></td><td>${x.agent}</td><td><span class="ra-tag ${badge(x.status)}">${x.statusName}</span></td><td><a class="ra-link" href="registration-application-detail.html?id=${encodeURIComponent(x.id)}${x.source==='batch'?'&legacy=1':''}">详情</a></td></tr>`).join('');$('result').textContent='共 '+list.length+' 条登记申请'}
+$('query').onclick=render;$('reset').onclick=()=>{['work','cp','applicant'].forEach(id=>$(id).value='');['type','source','status'].forEach(id=>$(id).value='all');render()};$('batchAdd').onclick=()=>alert('批量新增 Demo：沿用原批量登记入口');render();
+</script>
+</body></html>
