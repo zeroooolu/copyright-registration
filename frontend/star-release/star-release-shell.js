@@ -18,6 +18,9 @@
   topbar.innerHTML=`<div class="topbar-actions"><a class="topbar-action" href="#"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.8 9.2a2.4 2.4 0 1 1 4.6 1c-.35.8-1.1 1.2-1.7 1.7-.5.4-.7.9-.7 1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.1" r="1" fill="currentColor"/></svg><span>帮助中心</span></a><a class="topbar-action" href="#"><span>简体中文</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a><a class="topbar-action" href="#"><span>环环</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a></div>`;
 
   const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  const registrationLabel=type=>type==='composition'?'登记词曲的著作权':'登记录音的著作权';
+
   if(file==='index.html'){
     const start=document.getElementById('continueBtn');
     if(start){
@@ -34,21 +37,77 @@
       });
     }
 
-    const demoStatuses={
-      '青花瓷':'pending_first_review',
-      '夜曲':'issued',
-      '晴天':'pending_payment',
-      '稻香':'draft'
-    };
-    document.querySelectorAll('.record-table tbody tr').forEach(row=>{
-      const name=row.querySelector('.work-title')?.textContent?.trim();
-      const meta=row.querySelector('.work-artist')?.textContent?.trim()||'';
-      const link=row.querySelector('.action-link');
-      if(!name||!link)return;
-      const parts=meta.split(' · ');
-      const q=new URLSearchParams({status:demoStatuses[name]||'pending_accept',title:name,artist:parts[0]||'',album:parts.slice(1).join(' · ')});
-      link.href='registration-detail.html?'+q.toString();
-    });
+    // 提交前记录必须保留自己的真实动作：草稿继续填写、待付款直接去付款。
+    // 不再用公共 shell 把这些链接统一覆盖成 registration-detail.html。
+    const rows=[...document.querySelectorAll('.record-table tbody tr')];
+    const pendingRow=rows.find(row=>row.querySelector('.status')?.textContent?.trim()==='待付款');
+    if(pendingRow){
+      const workCopy=pendingRow.querySelector('.work-copy');
+      if(workCopy&&!workCopy.querySelector('.group-note')){
+        const note=document.createElement('div');
+        note.className='group-note';
+        note.textContent='登记任务 · CRSUB202608260001';
+        workCopy.appendChild(note);
+      }
+      const payLink=pendingRow.querySelector('.action-link');
+      if(payLink){
+        payLink.textContent='去付款';
+        const rawHref=payLink.getAttribute('href')||'';
+        if(rawHref.includes('registration-step3.html')){
+          const url=new URL(rawHref,location.href);
+          url.searchParams.set('submission_no','CRSUB202608260001');
+          payLink.setAttribute('href',url.pathname.split('/').pop()+'?'+url.searchParams.toString());
+        }
+      }
+    }
+
+    // 支付成功返回后：消费掉 pending_payment Submission，并就地拆成独立 Application。
+    const state=new URLSearchParams(location.search);
+    if(state.get('payment')==='success'&&pendingRow){
+      const title=state.get('title')||pendingRow.querySelector('.work-title')?.textContent?.trim()||'晴天';
+      const artist=state.get('artist')||'周杰伦';
+      const album=state.get('album')||'叶惠美';
+      const cover=state.get('cover')||title.slice(0,1);
+      const types=(state.get('types')||'recording,composition').split(',').filter(Boolean);
+      const submissionNo=state.get('submission_no')||'CRSUB202608260001';
+      const orderNo=state.get('order_no')||'CRPAY202608260001';
+      const orderTotal=Number(state.get('order_total')||types.length*9.9||9.9);
+      const balanceDeduct=Number(state.get('balance_deduct')||0);
+      const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
+      const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
+      const suppliedAppNos=(state.get('app_nos')||'').split(',').filter(Boolean);
+      const appNos=types.map((type,index)=>suppliedAppNos[index]||('CR20260826'+String(index+1).padStart(4,'0')));
+      const rowsHTML=types.map((type,index)=>{
+        const siblingIndex=types.length>1?(index===0?1:0):-1;
+        const q=new URLSearchParams({
+          status:'pending_accept',title,artist,album,cover,type,
+          app_no:appNos[index],submission_no:submissionNo,order_no:orderNo,
+          submission_count:String(types.length),order_total:orderTotal.toFixed(1),
+          balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1),
+          paired:types.length>1?'1':'0',
+          sibling_type:siblingIndex>=0?(types[siblingIndex]||''):'',
+          sibling_app_no:siblingIndex>=0?(appNos[siblingIndex]||''):'',
+          sibling_status:siblingIndex>=0?'pending_accept':''
+        });
+        return `<tr class="${types.length>1?'same-submission':''}"><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">同次提交 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel(type))}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
+      }).join('');
+      pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
+      pendingRow.remove();
+
+      const count=document.querySelectorAll('.record-table tbody tr').length;
+      const totalLabel=document.querySelector('.records-footer > span');
+      if(totalLabel)totalLabel.textContent='共 '+count+' 条记录';
+
+      const toast=document.getElementById('toast');
+      if(toast){
+        toast.textContent='支付成功，已生成 '+types.length+' 条独立登记申请';
+        toast.classList.add('show');
+        setTimeout(()=>toast.classList.remove('show'),2200);
+      }
+      if(state.get('view')==='records'){
+        setTimeout(()=>document.querySelector('.records-card')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+      }
+    }
   }
 
   if(file==='registration-step1.html'){
@@ -69,6 +128,49 @@
         const amount=(types.length*9.9).toFixed(1);
         const q=new URLSearchParams({title,artist,album,cover,types:types.join(','),amount});
         location.href='registration-step2.html?'+q.toString();
+      },true);
+    }
+  }
+
+  if(file==='payment-success.html'){
+    const p=new URLSearchParams(location.search);
+    const title=p.get('title')||'晴天';
+    const artist=p.get('artist')||'周杰伦';
+    const album=p.get('album')||'叶惠美';
+    const cover=p.get('cover')||title.slice(0,1);
+    const types=(p.get('types')||'recording').split(',').filter(Boolean);
+    const orderTotal=Number(p.get('order_total')||types.length*9.9||9.9);
+    const balanceDeduct=Number(p.get('balance_deduct')||0);
+    const paidAmount=Number(p.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
+    const submissionNo=p.get('submission_no')||'CRSUB202608260001';
+    const orderNo=p.get('order_no')||'CRPAY202608260001';
+    const appNos=types.map((type,index)=>'CR20260826'+String(index+1).padStart(4,'0'));
+
+    const goBack=viewRecords=>{
+      const q=new URLSearchParams({
+        payment:'success',title,artist,album,cover,types:types.join(','),
+        app_nos:appNos.join(','),submission_no:submissionNo,order_no:orderNo,
+        order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),
+        paid_amount:paidAmount.toFixed(1),submitted_at:'2026-08-26 14:38'
+      });
+      if(viewRecords)q.set('view','records');
+      location.href='star-release/index.html?'+q.toString();
+    };
+
+    const recordsBtn=document.getElementById('recordsBtn');
+    if(recordsBtn){
+      recordsBtn.addEventListener('click',e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        goBack(true);
+      },true);
+    }
+    const homeBtn=document.getElementById('homeBtn');
+    if(homeBtn){
+      homeBtn.addEventListener('click',e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        goBack(false);
       },true);
     }
   }
