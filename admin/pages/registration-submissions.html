@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>提交记录｜星球发行 · 著作权登记 Admin</title>
+<link rel="stylesheet" href="../assets/css/admin-common.css"><link rel="stylesheet" href="../assets/css/registration-admin.css">
+</head>
+<body data-admin-page="submissions" data-page-title="提交记录">
+<div id="admin-shell"></div>
+<template id="page-content">
+  <div class="page-header"><div><h1>提交记录</h1><p>查看用户一次自助登记提交、支付与拆分登记申请的完整关系。</p></div></div>
+  <div class="ra-tabs" id="tabs"></div>
+  <section class="ra-toolbar">
+    <div class="ra-field"><label>关键词</label><input class="ra-input" id="keyword" placeholder="提交编号 / 作品 / 用户 / CP"></div>
+    <div class="ra-field"><label>登记项目</label><select class="ra-select" id="type"><option value="all">全部</option><option value="recording">录音著作权</option><option value="composition">词曲著作权</option><option value="both">录音 + 词曲</option></select></div>
+    <div class="ra-field"><label>支付状态</label><select class="ra-select" id="payment"><option value="all">全部</option><option value="paid">已支付</option><option value="pending">待付款</option></select></div>
+    <div class="ra-actions"><button class="ra-btn" id="reset">重置</button><button class="ra-btn primary" id="query">查询</button></div>
+  </section>
+  <section class="ra-card">
+    <table class="ra-table"><colgroup><col style="width:12%"><col style="width:15%"><col style="width:16%"><col style="width:14%"><col style="width:13%"><col style="width:12%"><col style="width:10%"><col style="width:8%"></colgroup>
+      <thead><tr><th>提交时间</th><th>提交编号</th><th>用户 / CP</th><th>作品名称</th><th>登记项目</th><th>支付</th><th>已生成申请</th><th>操作</th></tr></thead><tbody id="tbody"></tbody>
+    </table>
+    <div class="ra-footer"><span id="result"></span><div class="ra-pager"><button class="ra-page">‹</button><button class="ra-page active">1</button><button class="ra-page">›</button></div></div>
+  </section>
+</template>
+<script src="../assets/js/admin-shell.js"></script>
+<script>
+const data=[
+{id:'CRSUB202609030001',time:'2026-09-03 16:20:18',user:'环环',cp:'看见音乐（上海）有限公司',work:'晴天',type:'both',types:['录音著作权','词曲著作权'],total:19.8,deduct:5,paid:14.8,payment:'paid',paymentName:'已支付',apps:2,status:'submitted'},
+{id:'CRSUB202609030002',time:'2026-09-03 17:05:42',user:'张三',cp:'星海音乐工作室',work:'夜曲',type:'composition',types:['词曲著作权'],total:9.9,deduct:0,paid:9.9,payment:'paid',paymentName:'已支付',apps:1,status:'submitted'},
+{id:'CRSUB202609030003',time:'2026-09-03 17:18:17',user:'李四',cp:'远山唱片',work:'七里香',type:'recording',types:['录音著作权'],total:9.9,deduct:0,paid:0,payment:'pending',paymentName:'待付款',apps:0,status:'pending_payment'},
+{id:'CRSUB202609020011',time:'2026-09-02 14:36:10',user:'Miro',cp:'Miro Studio',work:'凌晨三点的城市',type:'both',types:['录音著作权','词曲著作权'],total:19.8,deduct:19.8,paid:0,payment:'paid',paymentName:'余额全额抵扣',apps:2,status:'submitted'},
+{id:'CRSUB202609010006',time:'2026-09-01 10:22:09',user:'周棠',cp:'周棠音乐',work:'慢慢走',type:'recording',types:['录音著作权'],total:9.9,deduct:0,paid:9.9,payment:'paid',paymentName:'已支付',apps:1,status:'submitted'}
+];
+const tabs=[['all','全部'],['submitted','已提交'],['pending_payment','待付款']];let active='all';const $=id=>document.getElementById(id);
+function buildTabs(){const el=$('tabs');el.innerHTML=tabs.map(([k,n])=>`<button class="ra-tab ${active===k?'active':''}" data-k="${k}">${n}<span class="ra-count">${k==='all'?data.length:data.filter(x=>x.status===k).length}</span></button>`).join('');el.querySelectorAll('button').forEach(b=>b.onclick=()=>{active=b.dataset.k;buildTabs();render()})}
+function render(){const q=$('keyword').value.trim().toLowerCase(),t=$('type').value,p=$('payment').value;const list=data.filter(x=>(active==='all'||x.status===active)&&(!q||[x.id,x.user,x.cp,x.work].join(' ').toLowerCase().includes(q))&&(t==='all'||x.type===t)&&(p==='all'||x.payment===p));$('tbody').innerHTML=list.map(x=>`<tr><td>${x.time}</td><td><div class="ra-main">${x.id}</div><div class="ra-sub">用户自助登记</div></td><td><div class="ra-main">${x.user}</div><div class="ra-sub">${x.cp}</div></td><td><div class="ra-main">${x.work}</div></td><td><div style="display:flex;gap:5px;flex-wrap:wrap">${x.types.map(v=>`<span class="ra-tag blue">${v}</span>`).join('')}</div></td><td><div class="ra-main">¥${x.total.toFixed(2)}</div><div class="ra-sub">${x.deduct?`抵扣 ¥${x.deduct.toFixed(2)} · `:''}${x.paymentName}</div></td><td>${x.apps?`<span class="ra-tag green">${x.apps} 条申请</span>`:'<span class="ra-tag orange">尚未生成</span>'}</td><td><a class="ra-link" href="registration-submission-detail.html?id=${encodeURIComponent(x.id)}">详情</a></td></tr>`).join('');$('result').textContent='共 '+list.length+' 条提交记录'}
+$('query').onclick=render;$('reset').onclick=()=>{$('keyword').value='';$('type').value='all';$('payment').value='all';active='all';buildTabs();render()};buildTabs();render();
+</script>
+</body></html>
