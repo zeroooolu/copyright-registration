@@ -1,25 +1,92 @@
 (()=>{
   const sidebar=document.querySelector('.sidebar'),topbar=document.querySelector('.topbar');
   if(!sidebar||!topbar)return;
+
+  const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
+  const currentParams=new URLSearchParams(location.search);
+  const isOuterPaymentPage=file==='payment-center-checkout.html'||file==='payment-success.html';
+  const copyrightHome=isOuterPaymentPage?'star-release/index.html':'index.html';
   const active='copyright';
+  const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  const registrationLabel=type=>type==='composition'?'登记词曲的著作权':'登记录音的著作权';
+  const url=(target,params=currentParams)=>{const q=params.toString();return target+(q?'?'+q:'')};
+  const registrationParams=()=>{
+    const keys=['title','artist','album','cover','types','amount','submission_no'];
+    const q=new URLSearchParams();
+    keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
+    return q;
+  };
+  const step3FromPayment=()=>{
+    const q=new URLSearchParams();
+    ['title','artist','album','cover','types','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
+    const total=currentParams.get('order_total');
+    if(total)q.set('amount',total);
+    return 'star-release/registration-step3.html'+(q.toString()?'?'+q.toString():'');
+  };
+  const successRecordsUrl=(viewRecords=true)=>{
+    const title=currentParams.get('title')||'晴天';
+    const artist=currentParams.get('artist')||'周杰伦';
+    const album=currentParams.get('album')||'叶惠美';
+    const cover=currentParams.get('cover')||title.slice(0,1);
+    const types=(currentParams.get('types')||'recording').split(',').filter(Boolean);
+    const total=Number(currentParams.get('order_total')||types.length*9.9||9.9);
+    const deduct=Number(currentParams.get('balance_deduct')||0);
+    const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
+    const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
+    const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
+    const appNos=types.map((type,index)=>'CR20260826'+String(index+1).padStart(4,'0'));
+    const q=new URLSearchParams({
+      payment:'success',title,artist,album,cover,types:types.join(','),app_nos:appNos.join(','),
+      submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
+      balance_deduct:deduct.toFixed(1),paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
+    });
+    if(viewRecords)q.set('view','records');
+    return 'star-release/index.html?'+q.toString();
+  };
+
+  document.body.classList.add('star-page-'+file.replace(/\.html$/,''));
+
   const nav=[
     ['home','#','<path fill="currentColor" d="M3 10.6 12 3l9 7.6V21h-6v-6H9v6H3V10.6Z"/>','主页'],
     ['albums','#','<circle cx="12" cy="12" r="8.2" fill="currentColor"/><circle cx="12" cy="12" r="2.3" fill="#fff"/>','专辑列表'],
     ['video','#','<rect x="3.2" y="6.5" width="12.8" height="11" rx="1.5" fill="currentColor"/><path d="M16 9.7 21 7.4v9.2L16 14.3V9.7Z" fill="currentColor"/>','视频'],
     ['artist','#','<circle cx="9" cy="8" r="4" fill="currentColor"/><path d="M2.8 20c.4-4.1 2.7-6.2 6.2-6.2 3.4 0 5.8 2.1 6.2 6.2H2.8Z" fill="currentColor"/>','艺人'],
     ['promotion','#','<path d="M2.7 13.1c2.8-1.2 4.4-3.4 5.1-6.4 4.9-.3 8.7 1 11.5 4-1 4.7-4 7.6-8.9 8.8-2.8.7-5.3-.1-7.2-2.5 1.1-.9 1.8-2.2 2-3.8-.9.3-1.7.3-2.5-.1Z" fill="currentColor"/>','音乐推广'],
-    ['copyright','index.html','<path d="M5 3h10l4 4v14H5V3Z" fill="currentColor"/><path d="M15 3v4h4M8 11h8M8 15h6" stroke="#fff" stroke-width="1.4"/><path d="m9 18 1.6 1.6L14 16.2" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>','著作权登记'],
+    ['copyright',copyrightHome,'<path d="M5 3h10l4 4v14H5V3Z" fill="currentColor"/><path d="M15 3v4h4M8 11h8M8 15h6" stroke="#fff" stroke-width="1.4"/><path d="m9 18 1.6 1.6L14 16.2" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>','著作权登记'],
     ['royalty','#','<rect x="4" y="3.5" width="16" height="17" rx="3" fill="currentColor"/><path d="M8.4 9.1h7.2M8.4 14.9h7.2M12 6.8v10.4" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>','我的版税'],
     ['contract','#','<path d="M5 2.8h10l4 4V21H5V2.8Z" fill="currentColor"/><path d="M15 2.8v4h4M8 11h8M8 15h8" stroke="#fff" stroke-width="1.4"/>','我的合同'],
     ['analysis','#','<rect x="3" y="3" width="18" height="18" rx="2" fill="currentColor"/><path d="M6.5 15.8 10 12.3l2.5 2.2 5-5" fill="none" stroke="#fff" stroke-width="1.6"/>','销售分析']
   ];
+
+  let context=null;
+  if(file==='registration-step1.html'){
+    context={back:'index.html',crumbs:[['著作权登记','index.html'],['填写登记信息']],hide:['.page-head .back']};
+  }else if(file==='registration-step2.html'){
+    const back=url('registration-step1.html',registrationParams());
+    context={back,crumbs:[['著作权登记','index.html'],['填写登记信息',back],['签署登记授权']],hide:['.page-head .back']};
+  }else if(file==='registration-step3.html'){
+    const back=url('registration-step2.html',registrationParams());
+    context={back,crumbs:[['著作权登记','index.html'],['签署登记授权',back],['确认付款并提交']],hide:['.page-head .back']};
+  }else if(file==='registration-detail.html'){
+    context={back:'index.html',crumbs:[['著作权登记','index.html'],['登记详情']],hide:['.page-head .head-left a']};
+  }else if(file==='payment-center-checkout.html'){
+    const back=step3FromPayment();
+    context={back,crumbs:[['著作权登记','star-release/index.html'],['确认付款并提交',back],['统一收银台']],hide:['.host>.head .back']};
+  }else if(file==='payment-success.html'){
+    const back=successRecordsUrl(true);
+    context={back,crumbs:[['著作权登记','star-release/index.html'],['支付并提交'],['提交成功']],hide:[]};
+  }
+
   sidebar.setAttribute('aria-label','星球发行主导航');
   sidebar.innerHTML=`<div class="brand"><div class="brand-logo"><img src="https://star.kanjian.com/app/release/images/star-logo.png" alt="星球发行"></div></div><nav class="nav">${nav.map(([id,href,icon,label])=>`<a class="nav-item${id===active?' active':''}" href="${href}"${id===active?' aria-current="page"':''}><svg class="nav-icon" viewBox="0 0 24 24">${icon}</svg><span class="nav-label">${label}</span></a>`).join('')}</nav>`;
-  topbar.innerHTML=`<div class="topbar-actions"><a class="topbar-action" href="#"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.8 9.2a2.4 2.4 0 1 1 4.6 1c-.35.8-1.1 1.2-1.7 1.7-.5.4-.7.9-.7 1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.1" r="1" fill="currentColor"/></svg><span>帮助中心</span></a><a class="topbar-action" href="#"><span>简体中文</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a><a class="topbar-action" href="#"><span>环环</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a></div>`;
 
-  const file=(location.pathname.split('/').pop()||'index.html').toLowerCase();
-  const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-  const registrationLabel=type=>type==='composition'?'登记词曲的著作权':'登记录音的著作权';
+  const contextHtml=context?`<div class="topbar-context"><a class="topbar-back" href="${escapeHTML(context.back)}" aria-label="返回上一层"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.8 4.5 7.3 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>返回</span></a><span class="topbar-context-divider"></span><nav class="topbar-breadcrumb" aria-label="面包屑">${context.crumbs.map((item,i)=>{const label=item[0],href=item[1],last=i===context.crumbs.length-1;return `${i?'<span class="topbar-breadcrumb-separator">/</span>':''}${last||!href?`<span class="topbar-breadcrumb-current">${escapeHTML(label)}</span>`:`<a href="${escapeHTML(href)}">${escapeHTML(label)}</a>`}`}).join('')}</nav></div>`:'';
+  topbar.innerHTML=`${contextHtml}<div class="topbar-actions"><a class="topbar-action" href="#"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M9.8 9.2a2.4 2.4 0 1 1 4.6 1c-.35.8-1.1 1.2-1.7 1.7-.5.4-.7.9-.7 1.7" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="12" cy="17.1" r="1" fill="currentColor"/></svg><span>帮助中心</span></a><a class="topbar-action" href="#"><span>简体中文</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a><a class="topbar-action" href="#"><span>环环</span><svg class="caret" viewBox="0 0 12 12"><path d="m2 4 4 4 4-4H2Z" fill="currentColor"/></svg></a></div>`;
+
+  if(context){
+    document.body.classList.add('star-has-context-nav');
+    (context.hide||[]).forEach(selector=>document.querySelectorAll(selector).forEach(el=>el.classList.add('shell-return-migrated')));
+  }
 
   if(file==='index.html'){
     const start=document.getElementById('continueBtn');
@@ -37,8 +104,6 @@
       });
     }
 
-    // 提交前记录必须保留自己的真实动作：草稿继续填写、待付款直接去付款。
-    // 不再用公共 shell 把这些链接统一覆盖成 registration-detail.html。
     const rows=[...document.querySelectorAll('.record-table tbody tr')];
     const pendingRow=rows.find(row=>row.querySelector('.status')?.textContent?.trim()==='待付款');
     if(pendingRow){
@@ -54,14 +119,13 @@
         payLink.textContent='去付款';
         const rawHref=payLink.getAttribute('href')||'';
         if(rawHref.includes('registration-step3.html')){
-          const url=new URL(rawHref,location.href);
-          url.searchParams.set('submission_no','CRSUB202608260001');
-          payLink.setAttribute('href',url.pathname.split('/').pop()+'?'+url.searchParams.toString());
+          const target=new URL(rawHref,location.href);
+          target.searchParams.set('submission_no','CRSUB202608260001');
+          payLink.setAttribute('href',target.pathname.split('/').pop()+'?'+target.searchParams.toString());
         }
       }
     }
 
-    // 支付成功返回后：消费掉 pending_payment Submission，并就地拆成独立 Application。
     const state=new URLSearchParams(location.search);
     if(state.get('payment')==='success'&&pendingRow){
       const title=state.get('title')||pendingRow.querySelector('.work-title')?.textContent?.trim()||'晴天';
@@ -133,30 +197,7 @@
   }
 
   if(file==='payment-success.html'){
-    const p=new URLSearchParams(location.search);
-    const title=p.get('title')||'晴天';
-    const artist=p.get('artist')||'周杰伦';
-    const album=p.get('album')||'叶惠美';
-    const cover=p.get('cover')||title.slice(0,1);
-    const types=(p.get('types')||'recording').split(',').filter(Boolean);
-    const orderTotal=Number(p.get('order_total')||types.length*9.9||9.9);
-    const balanceDeduct=Number(p.get('balance_deduct')||0);
-    const paidAmount=Number(p.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
-    const submissionNo=p.get('submission_no')||'CRSUB202608260001';
-    const orderNo=p.get('order_no')||'CRPAY202608260001';
-    const appNos=types.map((type,index)=>'CR20260826'+String(index+1).padStart(4,'0'));
-
-    const goBack=viewRecords=>{
-      const q=new URLSearchParams({
-        payment:'success',title,artist,album,cover,types:types.join(','),
-        app_nos:appNos.join(','),submission_no:submissionNo,order_no:orderNo,
-        order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),
-        paid_amount:paidAmount.toFixed(1),submitted_at:'2026-08-26 14:38'
-      });
-      if(viewRecords)q.set('view','records');
-      location.href='star-release/index.html?'+q.toString();
-    };
-
+    const goBack=viewRecords=>{location.href=successRecordsUrl(viewRecords)};
     const recordsBtn=document.getElementById('recordsBtn');
     if(recordsBtn){
       recordsBtn.addEventListener('click',e=>{
