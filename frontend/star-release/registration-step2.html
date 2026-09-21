@@ -41,7 +41,7 @@
 </aside>
 </div></div></main><div class="toast" id="toast"></div><script src="star-release-shell.js"></script><script>
 (()=>{
-  const p=new URLSearchParams(location.search),title=p.get('title')||'晴天',artist=p.get('artist')||'周杰伦',album=p.get('album')||'叶惠美',cover=p.get('cover')||title.slice(0,1),types=(p.get('types')||'recording').split(',').filter(Boolean),amount=Number(p.get('amount')||types.length*9.9||9.9);
+  const p=new URLSearchParams(location.search),title=p.get('title')||'晴天',artist=p.get('artist')||'周杰伦',album=p.get('album')||'叶惠美',cover=p.get('cover')||title.slice(0,1),types=(p.get('types')||'recording').split(',').filter(Boolean),amount=Number(p.get('amount')||types.length*39||39);
   const label=t=>t==='composition'?'登记词曲的著作权':'登记录音的著作权';
   document.getElementById('song').textContent=title;document.getElementById('pdfSong').textContent=title;document.getElementById('cover').textContent=cover;document.getElementById('types').textContent=types.map(label).join('、');
   const back=new URLSearchParams({title,artist,album,cover});document.getElementById('backLink').href='registration-step1.html?'+back.toString();
