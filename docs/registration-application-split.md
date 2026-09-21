@@ -17,12 +17,12 @@
 
 ```text
 一次登记任务
-  ├─ 登记录音的著作权 ¥9.9
-  └─ 登记词曲的著作权 ¥9.9
+  ├─ 登记录音的著作权 ¥39
+  └─ 登记词曲的著作权 ¥39
           ↓
 一次签约
           ↓
-一次支付 ¥19.8
+一次支付 ¥78
           ↓
 支付成功并提交
           ↓
@@ -63,7 +63,7 @@ submitted_at
 id / order_no
 submission_id
 item_count
-item_fee                9.90
+item_fee                39.00
 order_total
 balance_deduct
 paid_amount
@@ -84,7 +84,7 @@ submission_id
 payment_order_id
 work_id
 registration_type       recording / composition
-item_fee                9.90
+item_fee                39.00
 status
 accepted_at
 completed_at
@@ -195,9 +195,9 @@ issued                 已发证
 同时选择两项时：
 
 ```text
-登记录音的著作权  ¥9.9
-登记词曲的著作权  ¥9.9
-合计               ¥19.8
+登记录音的著作权  ¥39
+登记词曲的著作权  ¥39
+合计               ¥78
 ```
 
 付款前明确提示：
@@ -266,13 +266,13 @@ paid_amount
 费用区域需区分：
 
 ```text
-本项登记服务费       ¥9.90
-本次提交共 2 项      ¥19.80
+本项登记服务费       ¥39.00
+本次提交共 2 项      ¥78.00
 余额抵扣             -¥5.00   // 共享订单
-本次订单实际支付      ¥14.80   // 共享订单
+本次订单实际支付      ¥73.00   // 共享订单
 ```
 
-不要把 ¥14.80 解释为当前单条申请的实付金额。
+不要把 ¥73.00 解释为当前单条申请的实付金额。
 
 ---
 
