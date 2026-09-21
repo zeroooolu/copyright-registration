@@ -29,7 +29,7 @@
     q.delete('status');
     q.set('supplement','1');
     q.set('types',currentParams.get('type')||'recording');
-    q.set('amount','9.9');
+    q.set('amount','39');
     return 'registration-step1.html?'+q.toString();
   };
   const step3FromPayment=()=>{
@@ -45,7 +45,7 @@
     const album=currentParams.get('album')||'叶惠美';
     const cover=currentParams.get('cover')||title.slice(0,1);
     const types=(currentParams.get('types')||'recording').split(',').filter(Boolean);
-    const total=Number(currentParams.get('order_total')||types.length*9.9||9.9);
+    const total=Number(currentParams.get('order_total')||types.length*39||39);
     const deduct=Number(currentParams.get('balance_deduct')||0);
     const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
     const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
@@ -221,7 +221,7 @@
       const types=(state.get('types')||'recording,composition').split(',').filter(Boolean);
       const submissionNo=state.get('submission_no')||'CRSUB202608260001';
       const orderNo=state.get('order_no')||'CRPAY202608260001';
-      const orderTotal=Number(state.get('order_total')||types.length*9.9||9.9);
+      const orderTotal=Number(state.get('order_total')||types.length*39||39);
       const balanceDeduct=Number(state.get('balance_deduct')||0);
       const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
@@ -320,7 +320,7 @@
         const album=p.get('album')||parts.slice(1).join(' · ');
         const cover=p.get('cover')||document.getElementById('songCover')?.textContent?.trim()||title.slice(0,1);
         const types=[...document.querySelectorAll('.type-card.selected')].map(card=>card.dataset.type).filter(Boolean);
-        const amount=(types.length*9.9).toFixed(1);
+        const amount=(types.length*39).toFixed(1);
         const q=new URLSearchParams({title,artist,album,cover,types:types.join(','),amount});
         location.href='registration-step2.html?'+q.toString();
       },true);
