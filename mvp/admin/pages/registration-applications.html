@@ -19,8 +19,8 @@
   </section>
   <div style="margin-bottom:14px"><button class="ra-btn primary" id="batchAdd">批量新增</button></div>
   <section class="ra-card">
-    <table class="ra-table"><colgroup><col style="width:13%"><col style="width:17%"><col style="width:16%"><col style="width:20%"><col style="width:10%"><col style="width:9%"><col style="width:9%"><col style="width:6%"></colgroup>
-      <thead><tr><th>提交时间</th><th>申请编号 / 登记 ID</th><th>作品名称</th><th>CP / 申请人</th><th>来源</th><th>代理人</th><th>状态</th><th>操作</th></tr></thead><tbody id="tbody"></tbody>
+    <table class="ra-table"><colgroup><col style="width:14%"><col style="width:18%"><col style="width:18%"><col style="width:22%"><col style="width:11%"><col style="width:8%"><col style="width:9%"></colgroup>
+      <thead><tr><th>提交时间</th><th>申请编号 / 登记 ID</th><th>作品名称</th><th>CP / 申请人</th><th>来源</th><th>代理人</th><th>状态</th></tr></thead><tbody id="tbody"></tbody>
     </table>
     <div class="ra-footer"><span id="result"></span><div class="ra-pager"><button class="ra-page">‹</button><button class="ra-page active">1</button><button class="ra-page">›</button></div></div>
   </section>
@@ -40,7 +40,7 @@ const rows=[
 ];
 const badge=s=>({pending_accept:'orange',pending_supplement:'red',pending_registration:'blue',pending_first_review:'blue',pending_re_review:'blue',pending_certificate:'blue',issued:'green',failed:'red'}[s]||'gray');
 const $=id=>document.getElementById(id),tbody=$('tbody');
-function render(){const w=$('work').value.trim().toLowerCase(),cp=$('cp').value.trim().toLowerCase(),a=$('applicant').value.trim().toLowerCase(),src=$('source').value,st=$('status').value;const list=rows.filter(x=>(!w||x.work.toLowerCase().includes(w))&&(!cp||x.cp.toLowerCase().includes(cp))&&(!a||x.applicant.toLowerCase().includes(a))&&(src==='all'||x.source===src)&&(st==='all'||x.status===st));tbody.innerHTML=list.map(x=>`<tr><td>${x.time}</td><td><div class="ra-main">${x.id}</div><div class="ra-sub">登记 ID：${x.rid}</div></td><td><div class="ra-main">${x.work}</div>${x.source==='self'?'<div class="ra-sub">同次提交 · CRSUB202609030001</div>':''}</td><td><div>${x.cp}</div><div class="ra-sub">申请人：${x.applicant}</div></td><td><span class="ra-tag ${x.source==='self'?'source-self':'source-old'}">${x.source==='self'?'用户自助':'后台批量'}</span></td><td>${x.agent}</td><td><span class="ra-tag ${badge(x.status)}">${x.statusName}</span></td><td><a class="ra-link" href="registration-application-detail.html?id=${encodeURIComponent(x.id)}${x.source==='batch'?'&legacy=1':''}">详情</a></td></tr>`).join('');$('result').textContent='共 '+list.length+' 条登记申请'}
+function render(){const w=$('work').value.trim().toLowerCase(),cp=$('cp').value.trim().toLowerCase(),a=$('applicant').value.trim().toLowerCase(),src=$('source').value,st=$('status').value;const list=rows.filter(x=>(!w||x.work.toLowerCase().includes(w))&&(!cp||x.cp.toLowerCase().includes(cp))&&(!a||x.applicant.toLowerCase().includes(a))&&(src==='all'||x.source===src)&&(st==='all'||x.status===st));tbody.innerHTML=list.map(x=>`<tr><td>${x.time}</td><td><div class="ra-main">${x.id}</div><div class="ra-sub">登记 ID：${x.rid}</div></td><td><div class="ra-main">${x.work}</div></td><td><div>${x.cp}</div><div class="ra-sub">申请人：${x.applicant}</div></td><td><span class="ra-tag ${x.source==='self'?'source-self':'source-old'}">${x.source==='self'?'用户自助':'后台批量'}</span></td><td>${x.agent}</td><td><span class="ra-tag ${badge(x.status)}">${x.statusName}</span></td></tr>`).join('');$('result').textContent='共 '+list.length+' 条登记申请'}
 $('query').onclick=render;$('reset').onclick=()=>{['work','cp','applicant'].forEach(id=>$(id).value='');['source','status'].forEach(id=>$(id).value='all');render()};$('batchAdd').onclick=()=>alert('批量新增 Demo：沿用原批量登记入口');render();
 </script>
 </body></html>
