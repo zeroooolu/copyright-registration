@@ -18,7 +18,7 @@
   };
   const applicationParams=(statusValue)=>{
     const q=new URLSearchParams();
-    const keys=['title','artist','album','cover','registration_name','type','app_no','submission_no','order_no','submission_count','order_total','balance_deduct','paid_amount'];
+    const keys=['title','artist','album','cover','registration_name','type','app_no','submission_no','order_no','submission_count','order_total','paid_amount'];
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     q.set('status',statusValue||currentParams.get('status')||'pending_supplement');
     return q;
@@ -31,12 +31,12 @@
     q.set('amount','39');
     return 'registration-step1.html?'+q.toString();
   };
-  const step3FromPayment=()=>{
+  const signingFromPayment=()=>{
     const q=new URLSearchParams();
-    ['title','artist','album','cover','registration_name','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
+    ['title','artist','album','cover','registration_name'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     const total=currentParams.get('order_total');
     if(total)q.set('amount',total);
-    return 'star-release/registration-step3.html'+(q.toString()?'?'+q.toString():'');
+    return 'star-release/registration-step2.html'+(q.toString()?'?'+q.toString():'');
   };
   const successRecordsUrl=(viewRecords=true)=>{
     const title=currentParams.get('title')||'晴天';
@@ -45,15 +45,14 @@
     const cover=currentParams.get('cover')||title.slice(0,1);
     const registrationName=currentParams.get('registration_name')||title;
     const total=39;
-    const deduct=Number(currentParams.get('balance_deduct')||0);
-    const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
+    const paid=Number(currentParams.get('paid_amount')||total);
     const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
     const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
     const appNos=['CR202608260001'];
     const q=new URLSearchParams({
       payment:'success',title,artist,album,cover,registration_name:registrationName,app_nos:appNos.join(','),
       submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
-      balance_deduct:deduct.toFixed(1),paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
+      paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
     });
     if(viewRecords)q.set('view','records');
     return 'star-release/index.html?'+q.toString();
@@ -155,8 +154,8 @@
   }else if(file==='registration-detail.html'){
     context={back:'index.html',crumbs:[['著作权登记','index.html'],['登记详情']],hide:['.page-head .head-left a']};
   }else if(file==='payment-center-checkout.html'){
-    const back=step3FromPayment();
-    context={back,crumbs:[['著作权登记','star-release/index.html'],['确认付款并提交',back],['统一收银台']],hide:['.host>.head .back']};
+    const back=signingFromPayment();
+    context={back,crumbs:[['著作权登记','star-release/index.html'],['签署登记授权',back],['统一收银台']],hide:['.host>.head .back']};
   }else if(file==='payment-success.html'){
     const back=successRecordsUrl(true);
     context={back,crumbs:[['著作权登记','star-release/index.html'],['支付并提交'],['提交成功']],hide:[]};
@@ -205,8 +204,12 @@
         const rawHref=payLink.getAttribute('href')||'';
         if(rawHref.includes('registration-step3.html')){
           const target=new URL(rawHref,location.href);
-          target.searchParams.set('submission_no','CRSUB202608260001');
-          payLink.setAttribute('href',target.pathname.split('/').pop()+'?'+target.searchParams.toString());
+          const q=new URLSearchParams(target.search);
+          q.set('source','copyright');
+          q.set('submission_no','CRSUB202608260001');
+          q.set('order_total',q.get('amount')||'39.0');
+          q.delete('amount');
+          payLink.setAttribute('href','../payment-center-checkout.html?'+q.toString());
         }
       }
     }
@@ -221,11 +224,10 @@
       const submissionNo=state.get('submission_no')||'CRSUB202608260001';
       const orderNo=state.get('order_no')||'CRPAY202608260001';
       const orderTotal=39;
-      const balanceDeduct=Number(state.get('balance_deduct')||0);
-      const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
+      const paidAmount=Number(state.get('paid_amount')||orderTotal);
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
       const suppliedAppNo=(state.get('app_nos')||'CR202608260001').split(',').filter(Boolean)[0]||'CR202608260001';
-      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,registration_name:registrationName,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1)});
+      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,registration_name:registrationName,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),paid_amount:paidAmount.toFixed(1)});
       const rowsHTML=`<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">提交编号 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel())}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
       pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
       pendingRow.remove();
