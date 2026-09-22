@@ -8,7 +8,6 @@
   const copyrightHome=isOuterPaymentPage?'star-release/index.html':'index.html';
   const active='copyright';
   const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-  const registrationLabel=()=> '录音制品';
   const url=(target,params=currentParams)=>{const q=params.toString();return target+(q?'?'+q:'')};
   const registrationParams=()=>{
     const keys=['title','artist','album','cover','registration_name','amount','submission_no'];
@@ -18,7 +17,7 @@
   };
   const applicationParams=(statusValue)=>{
     const q=new URLSearchParams();
-    const keys=['title','artist','album','cover','registration_name','type','app_no','submission_no','order_no','submission_count','order_total','paid_amount'];
+    const keys=['title','artist','album','cover','registration_name','app_no','submission_no','order_no','order_total','paid_amount'];
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     q.set('status',statusValue||currentParams.get('status')||'pending_supplement');
     return q;
@@ -48,9 +47,9 @@
     const paid=Number(currentParams.get('paid_amount')||total);
     const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
     const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
-    const appNos=['CR202608260001'];
+    const appNo=currentParams.get('app_no')||'CR202608260001';
     const q=new URLSearchParams({
-      payment:'success',title,artist,album,cover,registration_name:registrationName,app_nos:appNos.join(','),
+      payment:'success',title,artist,album,cover,registration_name:registrationName,app_no:appNo,
       submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
       paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
     });
@@ -148,9 +147,6 @@
   }else if(file==='registration-step2.html'){
     const back=url('registration-step1.html',registrationParams());
     context={back,crumbs:[['著作权登记','index.html'],['填写登记信息',back],['签署登记授权']],hide:['.page-head .back']};
-  }else if(file==='registration-step3.html'){
-    const back=url('registration-step2.html',registrationParams());
-    context={back,crumbs:[['著作权登记','index.html'],['签署登记授权',back],['确认付款并提交']],hide:['.page-head .back']};
   }else if(file==='registration-detail.html'){
     context={back:'index.html',crumbs:[['著作权登记','index.html'],['登记详情']],hide:['.page-head .head-left a']};
   }else if(file==='payment-center-checkout.html'){
@@ -190,30 +186,6 @@
 
     const rows=[...document.querySelectorAll('.record-table tbody tr')];
     const pendingRow=rows.find(row=>row.querySelector('.status')?.textContent?.trim()==='待付款');
-    if(pendingRow){
-      const workCopy=pendingRow.querySelector('.work-copy');
-      if(workCopy&&!workCopy.querySelector('.group-note')){
-        const note=document.createElement('div');
-        note.className='group-note';
-        note.textContent='登记任务 · CRSUB202608260001';
-        workCopy.appendChild(note);
-      }
-      const payLink=pendingRow.querySelector('.action-link');
-      if(payLink){
-        payLink.textContent='去付款';
-        const rawHref=payLink.getAttribute('href')||'';
-        if(rawHref.includes('registration-step3.html')){
-          const target=new URL(rawHref,location.href);
-          const q=new URLSearchParams(target.search);
-          q.set('source','copyright');
-          q.set('submission_no','CRSUB202608260001');
-          q.set('order_total',q.get('amount')||'39.0');
-          q.delete('amount');
-          payLink.setAttribute('href','../payment-center-checkout.html?'+q.toString());
-        }
-      }
-    }
-
     const state=new URLSearchParams(location.search);
     if(state.get('payment')==='success'&&pendingRow){
       const title=state.get('title')||pendingRow.querySelector('.work-title')?.textContent?.trim()||'晴天';
@@ -226,9 +198,9 @@
       const orderTotal=39;
       const paidAmount=Number(state.get('paid_amount')||orderTotal);
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
-      const suppliedAppNo=(state.get('app_nos')||'CR202608260001').split(',').filter(Boolean)[0]||'CR202608260001';
-      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,registration_name:registrationName,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),paid_amount:paidAmount.toFixed(1)});
-      const rowsHTML=`<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">提交编号 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel())}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
+      const suppliedAppNo=state.get('app_no')||'CR202608260001';
+      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,registration_name:registrationName,app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,order_total:orderTotal.toFixed(1),paid_amount:paidAmount.toFixed(1)});
+      const rowsHTML=`<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(registrationName)}</div><div class="work-artist">作品名称：${escapeHTML(title)} · ${escapeHTML(artist)} · ${escapeHTML(album)}</div></div></div></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
       pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
       pendingRow.remove();
 
