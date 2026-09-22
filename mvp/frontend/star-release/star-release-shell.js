@@ -15,21 +15,6 @@
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     return q;
   };
-  const applicationParams=(statusValue)=>{
-    const q=new URLSearchParams();
-    const keys=['title','artist','album','cover','registration_name','app_no','submission_no','order_no','order_total','paid_amount'];
-    keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
-    q.set('status',statusValue||currentParams.get('status')||'pending_supplement');
-    return q;
-  };
-  const detailUrl=statusValue=>url('registration-detail.html',applicationParams(statusValue));
-  const supplementEditUrl=()=>{
-    const q=applicationParams('pending_supplement');
-    q.delete('status');
-    q.set('supplement','1');
-    q.set('amount','39');
-    return 'registration-step1.html?'+q.toString();
-  };
   const signingFromPayment=()=>{
     const q=new URLSearchParams();
     ['title','artist','album','cover','registration_name'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
@@ -138,12 +123,7 @@
 
   let context=null;
   if(file==='registration-step1.html'){
-    if(currentParams.get('supplement')==='1'){
-      const back=detailUrl('pending_supplement');
-      context={back,crumbs:[['著作权登记','index.html'],['登记详情',back],['补充登记材料']],hide:['.page-head .back']};
-    }else{
-      context={back:'index.html',crumbs:[['著作权登记','index.html'],['填写登记信息']],hide:['.page-head .back']};
-    }
+    context={back:'index.html',crumbs:[['著作权登记','index.html'],['填写登记信息']],hide:['.page-head .back']};
   }else if(file==='registration-step2.html'){
     const back=url('registration-step1.html',registrationParams());
     context={back,crumbs:[['著作权登记','index.html'],['填写登记信息',back],['签署登记授权']],hide:['.page-head .back']};
@@ -221,53 +201,15 @@
   }
 
   if(file==='registration-step1.html'){
-    const isSupplement=currentParams.get('supplement')==='1';
-    if(isSupplement){
-      addDemoStyles();
-      const page=document.querySelector('.workspace .page');
-      const head=page?.querySelector('.page-head');
-      if(head&&!document.querySelector('.supplement-edit-banner')){
-        const banner=document.createElement('div');
-        banner.className='supplement-edit-banner';
-        banner.innerHTML='<span class="supplement-edit-badge">待补证</span><div class="supplement-edit-copy"><strong>需要你补充当前申请材料</strong><span>补正所需时间不计算在官方 30 个工作日办理时限内。</span><div class="supplement-edit-requirement">补正要求：请重新核对并上传当前申请的主体证明材料。</div></div>';
-        head.insertAdjacentElement('afterend',banner);
-      }
-      const next=document.getElementById('nextBtn');
-      if(next){
-        next.addEventListener('click',e=>{
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          const q=applicationParams('pending_registration');
-          q.set('supplement_submitted','1');
-          location.href='registration-detail.html?'+q.toString();
-        },true);
-      }
-      setTimeout(()=>{
-        const title=document.querySelector('.page-title');
-        const sub=document.querySelector('.page-sub');
-        if(title)title.textContent='补充登记材料';
-        if(sub)sub.textContent='请根据登记机构的补正要求修改并重新提交当前申请材料。';
-        const currentType=currentParams.get('type')||'recording';
-        document.querySelectorAll('.type-card').forEach(card=>{
-          const selected=card.dataset.type===currentType;
-          card.classList.toggle('selected',selected);
-          card.style.pointerEvents='none';
-          card.setAttribute('aria-disabled','true');
-          const input=card.querySelector('input[type="checkbox"]');
-          const check=card.querySelector('.type-check');
-          if(input)input.checked=selected;
-          if(check)check.textContent=selected?'✓':'';
-        });
-        const reselect=document.getElementById('reselectBtn');
-        if(reselect){reselect.disabled=true;reselect.textContent='当前申请作品';}
-        if(next)next.textContent='提交补充材料';
-        const save=document.querySelector('.save');
-        if(save)save.style.display='none';
-      },0);
+    if(currentParams.get('supplement')==='1'){
+      const q=new URLSearchParams(location.search);
+      q.delete('supplement');
+      q.set('status','pending_supplement');
+      location.replace('registration-detail.html?'+q.toString());
+      return;
     }
-
     const next=document.getElementById('nextBtn');
-    if(next&&!isSupplement){
+    if(next){
       next.addEventListener('click',e=>{
         if(next.disabled)return;
         e.preventDefault();
@@ -290,20 +232,6 @@
   if(file==='registration-detail.html'){
     addDemoStyles();
     document.addEventListener('click',e=>{
-      const primary=e.target.closest('#primaryBtn');
-      if(primary&&new URLSearchParams(location.search).get('status')==='pending_supplement'){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        location.href=supplementEditUrl();
-        return;
-      }
-      const certificate=e.target.closest('#certificateBtn');
-      if(certificate){
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        openDemoPdf('Copyright Registration Certificate');
-        return;
-      }
       const link=e.target.closest('.link');
       if(!link)return;
       const text=link.textContent.trim();
@@ -317,15 +245,6 @@
         openDemoImage(text);
       }
     },true);
-    if(currentParams.get('supplement_submitted')==='1'){
-      const page=document.querySelector('.workspace .page');
-      const head=page?.querySelector('.page-head');
-      if(head&&!document.querySelector('.supplement-submit-banner')){
-        const banner=document.createElement('div');
-        banner.className='supplement-submit-banner';
-        banner.innerHTML='<strong>补充材料已提交。</strong> 当前申请已恢复办理，后续状态将继续按当前申请独立更新。';
-        head.insertAdjacentElement('afterend',banner);
-      }
     }
   }
 
