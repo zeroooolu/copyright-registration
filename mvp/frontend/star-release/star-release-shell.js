@@ -245,7 +245,6 @@
         openDemoImage(text);
       }
     },true);
-    }
   }
 
   if(file==='payment-success.html'){
