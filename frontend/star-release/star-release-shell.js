@@ -18,7 +18,7 @@
   };
   const applicationParams=(statusValue)=>{
     const q=new URLSearchParams();
-    const keys=['title','artist','album','cover','type','app_no','submission_no','order_no','submission_count','order_total','balance_deduct','paid_amount','paired','sibling_type','sibling_app_no','sibling_status'];
+    const keys=['title','artist','album','cover','type','app_no','submission_no','order_no','submission_count','order_total','balance_deduct','paid_amount'];
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     q.set('status',statusValue||currentParams.get('status')||'pending_supplement');
     return q;
@@ -43,13 +43,12 @@
     const artist=currentParams.get('artist')||'周杰伦';
     const album=currentParams.get('album')||'叶惠美';
     const cover=currentParams.get('cover')||title.slice(0,1);
-    const types=['recording'];
     const total=39;
     const deduct=Number(currentParams.get('balance_deduct')||0);
     const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
     const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
     const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
-    const appNos=types.map((type,index)=>'CR20260826'+String(index+1).padStart(4,'0'));
+    const appNos=['CR202608260001'];
     const q=new URLSearchParams({
       payment:'success',title,artist,album,cover,app_nos:appNos.join(','),
       submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
@@ -217,29 +216,15 @@
       const artist=state.get('artist')||'周杰伦';
       const album=state.get('album')||'叶惠美';
       const cover=state.get('cover')||title.slice(0,1);
-      const types=['recording'];
       const submissionNo=state.get('submission_no')||'CRSUB202608260001';
       const orderNo=state.get('order_no')||'CRPAY202608260001';
       const orderTotal=39;
       const balanceDeduct=Number(state.get('balance_deduct')||0);
       const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
-      const suppliedAppNos=(state.get('app_nos')||'').split(',').filter(Boolean);
-      const appNos=types.map((type,index)=>suppliedAppNos[index]||('CR20260826'+String(index+1).padStart(4,'0')));
-      const rowsHTML=types.map((type,index)=>{
-        const siblingIndex=-1;
-        const q=new URLSearchParams({
-          status:'pending_accept',title,artist,album,cover,type,
-          app_no:appNos[index],submission_no:submissionNo,order_no:orderNo,
-          submission_count:String(types.length),order_total:orderTotal.toFixed(1),
-          balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1),
-          paired:'0',
-          sibling_type:siblingIndex>=0?(types[siblingIndex]||''):'',
-          sibling_app_no:siblingIndex>=0?(appNos[siblingIndex]||''):'',
-          sibling_status:siblingIndex>=0?'pending_accept':''
-        });
-        return `<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">同次提交 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel(type))}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
-      }).join('');
+      const suppliedAppNo=(state.get('app_nos')||'CR202608260001').split(',').filter(Boolean)[0]||'CR202608260001';
+      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1)});
+      const rowsHTML=`<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">提交编号 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel())}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
       pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
       pendingRow.remove();
 
