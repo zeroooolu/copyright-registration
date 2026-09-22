@@ -28,7 +28,7 @@
     <div class="offline-step"><span class="offline-num">3</span><strong>上传已签署协议</strong><p>请上传清晰、完整的已签协议文件。</p><label class="upload-box"><input id="signedFile" type="file" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png"><div><div class="upload-icon">⇧</div><div class="upload-main">点击上传已签协议</div><div class="upload-sub">支持 DOC、DOCX、PDF、JPG、PNG</div></div></label><div class="uploaded-file" id="uploadedFile"><span id="uploadedName">一般作品著作权登记授权委托协议_已签.pdf</span><span>✓ 已上传</span></div><div class="offline-actions"><button class="offline-submit" id="offlineSubmit" disabled>确认已签署并提交</button></div></div>
     <div class="signed" id="offlineSigned"><div class="signed-icon">✓</div><strong>已签协议提交成功</strong><span>文件已上传并确认<br>可继续进入付款与提交。</span></div>
 </div>
-<div class="sign-footer"><button class="next" id="nextBtn" disabled>下一步：确认付款</button><div class="footnote" id="footerNote">上传并确认已签署协议后可继续支付登记服务费</div></div>
+<div class="sign-footer"><button class="next" id="nextBtn" disabled>下一步：前往收银台</button><div class="footnote" id="footerNote">上传并确认已签署协议后可继续支付登记服务费</div></div>
 </aside>
 </div></div></main><div class="toast" id="toast"></div><script src="star-release-shell.js"></script><script>
 (()=>{
@@ -43,7 +43,7 @@
   const markUpload=name=>{offlineReady=true;document.getElementById('uploadedName').textContent=name||'一般作品著作权登记授权委托协议_已签.pdf';document.getElementById('uploadedFile').classList.add('show');document.getElementById('offlineSubmit').disabled=false;};
   document.getElementById('signedFile').addEventListener('change',e=>{if(e.target.files[0])markUpload(e.target.files[0].name)});
   document.getElementById('offlineSubmit').onclick=()=>{if(!offlineReady)return;offlineDone=true;document.querySelectorAll('.offline-step').forEach(x=>x.style.display='none');document.querySelector('.offline-intro').style.display='none';document.getElementById('offlineSigned').classList.add('show');refreshNext();show('已签协议提交成功')};
-  nextBtn.onclick=()=>{if(nextBtn.disabled)return;const q=new URLSearchParams({title,artist,album,cover,registration_name:registrationName,amount:amount.toFixed(1),signed:'1',sign_method:'offline_upload'});location.href='registration-step3.html?'+q.toString()};
+  nextBtn.onclick=()=>{if(nextBtn.disabled)return;const q=new URLSearchParams({source:'copyright',title,artist,album,cover,registration_name:registrationName,order_total:amount.toFixed(1),signed:'1',sign_method:'offline_upload'});location.href='../payment-center-checkout.html?'+q.toString()};
   refreshNext();
 })();
 </script></body></html>
