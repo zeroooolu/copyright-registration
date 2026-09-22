@@ -18,7 +18,7 @@
   };
   const applicationParams=(statusValue)=>{
     const q=new URLSearchParams();
-    const keys=['title','artist','album','cover','type','app_no','submission_no','order_no','submission_count','order_total','balance_deduct','paid_amount'];
+    const keys=['title','artist','album','cover','registration_name','type','app_no','submission_no','order_no','submission_count','order_total','balance_deduct','paid_amount'];
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     q.set('status',statusValue||currentParams.get('status')||'pending_supplement');
     return q;
