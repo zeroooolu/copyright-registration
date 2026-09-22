@@ -32,9 +32,9 @@
 </aside>
 </div></div></main><div class="toast" id="toast"></div><script src="star-release-shell.js"></script><script>
 (()=>{
-  const p=new URLSearchParams(location.search),title=p.get('title')||'晴天',artist=p.get('artist')||'周杰伦',album=p.get('album')||'叶惠美',cover=p.get('cover')||title.slice(0,1),amount=39;
-  document.getElementById('song').textContent=title;document.getElementById('pdfSong').textContent=title;document.getElementById('cover').textContent=cover;document.getElementById('types').textContent='录音制品';
-  const back=new URLSearchParams({title,artist,album,cover});document.getElementById('backLink').href='registration-step1.html?'+back.toString();
+  const p=new URLSearchParams(location.search),title=p.get('title')||'晴天',artist=p.get('artist')||'周杰伦',album=p.get('album')||'叶惠美',cover=p.get('cover')||title.slice(0,1),registrationName=p.get('registration_name')||title,amount=39;
+  document.getElementById('song').textContent=title;document.getElementById('pdfSong').textContent=registrationName;document.getElementById('cover').textContent=cover;document.getElementById('types').textContent='录音制品';
+  const back=new URLSearchParams({title,artist,album,cover,registration_name:registrationName});document.getElementById('backLink').href='registration-step1.html?'+back.toString();
   const toast=document.getElementById('toast'),show=m=>{toast.textContent=m;toast.classList.add('show');clearTimeout(show.t);show.t=setTimeout(()=>toast.classList.remove('show'),1500)};
   let offlineDone=false,offlineReady=false;
   const nextBtn=document.getElementById('nextBtn'),footerNote=document.getElementById('footerNote');
@@ -43,7 +43,7 @@
   const markUpload=name=>{offlineReady=true;document.getElementById('uploadedName').textContent=name||'一般作品著作权登记授权委托协议_已签.pdf';document.getElementById('uploadedFile').classList.add('show');document.getElementById('offlineSubmit').disabled=false;};
   document.getElementById('signedFile').addEventListener('change',e=>{if(e.target.files[0])markUpload(e.target.files[0].name)});
   document.getElementById('offlineSubmit').onclick=()=>{if(!offlineReady)return;offlineDone=true;document.querySelectorAll('.offline-step').forEach(x=>x.style.display='none');document.querySelector('.offline-intro').style.display='none';document.getElementById('offlineSigned').classList.add('show');refreshNext();show('已签协议提交成功')};
-  nextBtn.onclick=()=>{if(nextBtn.disabled)return;const q=new URLSearchParams({title,artist,album,cover,amount:amount.toFixed(1),signed:'1',sign_method:'offline_upload'});location.href='registration-step3.html?'+q.toString()};
+  nextBtn.onclick=()=>{if(nextBtn.disabled)return;const q=new URLSearchParams({title,artist,album,cover,registration_name:registrationName,amount:amount.toFixed(1),signed:'1',sign_method:'offline_upload'});location.href='registration-step3.html?'+q.toString()};
   refreshNext();
 })();
 </script></body></html>
