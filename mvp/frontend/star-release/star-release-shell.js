@@ -11,7 +11,7 @@
   const registrationLabel=()=> '录音制品';
   const url=(target,params=currentParams)=>{const q=params.toString();return target+(q?'?'+q:'')};
   const registrationParams=()=>{
-    const keys=['title','artist','album','cover','amount','submission_no'];
+    const keys=['title','artist','album','cover','registration_name','amount','submission_no'];
     const q=new URLSearchParams();
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     return q;
@@ -33,7 +33,7 @@
   };
   const step3FromPayment=()=>{
     const q=new URLSearchParams();
-    ['title','artist','album','cover','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
+    ['title','artist','album','cover','registration_name','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     const total=currentParams.get('order_total');
     if(total)q.set('amount',total);
     return 'star-release/registration-step3.html'+(q.toString()?'?'+q.toString():'');
@@ -43,6 +43,7 @@
     const artist=currentParams.get('artist')||'周杰伦';
     const album=currentParams.get('album')||'叶惠美';
     const cover=currentParams.get('cover')||title.slice(0,1);
+    const registrationName=currentParams.get('registration_name')||title;
     const total=39;
     const deduct=Number(currentParams.get('balance_deduct')||0);
     const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
@@ -50,7 +51,7 @@
     const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
     const appNos=['CR202608260001'];
     const q=new URLSearchParams({
-      payment:'success',title,artist,album,cover,app_nos:appNos.join(','),
+      payment:'success',title,artist,album,cover,registration_name:registrationName,app_nos:appNos.join(','),
       submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
       balance_deduct:deduct.toFixed(1),paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
     });
@@ -216,6 +217,7 @@
       const artist=state.get('artist')||'周杰伦';
       const album=state.get('album')||'叶惠美';
       const cover=state.get('cover')||title.slice(0,1);
+      const registrationName=state.get('registration_name')||title;
       const submissionNo=state.get('submission_no')||'CRSUB202608260001';
       const orderNo=state.get('order_no')||'CRPAY202608260001';
       const orderTotal=39;
@@ -223,7 +225,7 @@
       const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
       const suppliedAppNo=(state.get('app_nos')||'CR202608260001').split(',').filter(Boolean)[0]||'CR202608260001';
-      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1)});
+      const q=new URLSearchParams({status:'pending_accept',title,artist,album,cover,registration_name:registrationName,type:'recording',app_no:suppliedAppNo,submission_no:submissionNo,order_no:orderNo,submission_count:'1',order_total:orderTotal.toFixed(1),balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1)});
       const rowsHTML=`<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">提交编号 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel())}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
       pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
       pendingRow.remove();
@@ -303,8 +305,9 @@
         const artist=p.get('artist')||parts[0]||'';
         const album=p.get('album')||parts.slice(1).join(' · ');
         const cover=p.get('cover')||document.getElementById('songCover')?.textContent?.trim()||title.slice(0,1);
+        const registrationName=document.getElementById('registrationName')?.value.trim()||title;
         const amount='39.0';
-        const q=new URLSearchParams({title,artist,album,cover,amount});
+        const q=new URLSearchParams({title,artist,album,cover,registration_name:registrationName,amount});
         location.href='registration-step2.html?'+q.toString();
       },true);
     }
