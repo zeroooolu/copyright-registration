@@ -59,7 +59,7 @@ if(paid){
   payStatus.textContent='已支付';
   document.getElementById('sideStatus').textContent='已提交';
   document.getElementById('sideDesc').textContent='本次提交已完成统一收银台支付并生成登记申请，后续办理状态请在登记申请中查看。';
-  document.getElementById('items').innerHTML='<div class="item-row"><div><strong>'+d.registrationName+'</strong><span>作品名称：'+d.work+' · 录音制品 · 登记服务费 ¥39.00</span></div><div class="price">¥39.00</div><div><a class="ra-link" href="registration-application-detail.html?id='+d.appNo+'">'+d.appNo+'</a></div></div>';
+  document.getElementById('items').innerHTML='<div class="item-row"><div><strong>'+d.registrationName+'</strong><span>作品名称：'+d.work+' · 录音制品</span></div><div class="price">¥39.00</div><div><a class="ra-link" href="registration-application-detail.html?id='+d.appNo+'">'+d.appNo+'</a></div></div>';
   document.getElementById('appCount').textContent='1 条';
   document.getElementById('appList').innerHTML='<a class="side-item" href="registration-application-detail.html?id='+d.appNo+'"><strong>'+d.registrationName+'</strong><span>'+d.appNo+' · 录音制品 · '+d.appStatus+' →</span></a>';
   document.getElementById('timeline').innerHTML='<div class="event"><strong>支付成功并完成提交</strong><span>'+d.time+' · 系统</span></div><div class="event"><strong>生成登记申请</strong><span>'+d.time+' · 系统</span></div><div class="event"><strong>上传已签署授权协议</strong><span>'+d.signedAt+' · 用户</span></div><div class="event"><strong>创建登记任务</strong><span>'+d.createdAt+' · 用户</span></div>';
@@ -70,7 +70,7 @@ if(paid){
   payStatus.textContent='待支付';
   document.getElementById('sideStatus').textContent='待付款';
   document.getElementById('sideDesc').textContent='用户已完成登记信息填写并上传签署协议，但尚未通过统一收银台完成支付，因此还没有生成登记申请。';
-  document.getElementById('items').innerHTML='<div class="item-row"><div><strong>'+d.registrationName+'</strong><span>作品名称：'+d.work+' · 录音制品 · 登记服务费 ¥39.00</span></div><div class="price">¥39.00</div><div class="empty-id">尚未生成</div></div>';
+  document.getElementById('items').innerHTML='<div class="item-row"><div><strong>'+d.registrationName+'</strong><span>作品名称：'+d.work+' · 录音制品</span></div><div class="price">¥39.00</div><div class="empty-id">尚未生成</div></div>';
   document.getElementById('appCount').textContent='0 条';
   document.getElementById('appList').innerHTML='<div class="side-item"><strong>尚未生成登记申请</strong><span>统一收银台支付成功后生成</span></div>';
   document.getElementById('timeline').innerHTML='<div class="event"><strong>等待统一收银台付款</strong><span>'+d.time+'</span></div><div class="event"><strong>上传已签署授权协议</strong><span>'+d.signedAt+' · 用户</span></div><div class="event"><strong>创建登记任务</strong><span>'+d.createdAt+' · 用户</span></div>';
