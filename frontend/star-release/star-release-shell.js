@@ -8,10 +8,10 @@
   const copyrightHome=isOuterPaymentPage?'star-release/index.html':'index.html';
   const active='copyright';
   const escapeHTML=value=>String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-  const registrationLabel=type=>type==='composition'?'登记词曲的著作权':'登记录音的著作权';
+  const registrationLabel=()=> '录音制品';
   const url=(target,params=currentParams)=>{const q=params.toString();return target+(q?'?'+q:'')};
   const registrationParams=()=>{
-    const keys=['title','artist','album','cover','types','amount','submission_no'];
+    const keys=['title','artist','album','cover','amount','submission_no'];
     const q=new URLSearchParams();
     keys.forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     return q;
@@ -28,13 +28,12 @@
     const q=applicationParams('pending_supplement');
     q.delete('status');
     q.set('supplement','1');
-    q.set('types',currentParams.get('type')||'recording');
     q.set('amount','39');
     return 'registration-step1.html?'+q.toString();
   };
   const step3FromPayment=()=>{
     const q=new URLSearchParams();
-    ['title','artist','album','cover','types','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
+    ['title','artist','album','cover','submission_no'].forEach(key=>{const value=currentParams.get(key);if(value!==null&&value!=='')q.set(key,value)});
     const total=currentParams.get('order_total');
     if(total)q.set('amount',total);
     return 'star-release/registration-step3.html'+(q.toString()?'?'+q.toString():'');
@@ -44,15 +43,15 @@
     const artist=currentParams.get('artist')||'周杰伦';
     const album=currentParams.get('album')||'叶惠美';
     const cover=currentParams.get('cover')||title.slice(0,1);
-    const types=(currentParams.get('types')||'recording').split(',').filter(Boolean);
-    const total=Number(currentParams.get('order_total')||types.length*39||39);
+    const types=['recording'];
+    const total=39;
     const deduct=Number(currentParams.get('balance_deduct')||0);
     const paid=Number(currentParams.get('paid_amount')||Math.max(0,total-deduct));
     const submissionNo=currentParams.get('submission_no')||'CRSUB202608260001';
     const orderNo=currentParams.get('order_no')||'CRPAY202608260001';
     const appNos=types.map((type,index)=>'CR20260826'+String(index+1).padStart(4,'0'));
     const q=new URLSearchParams({
-      payment:'success',title,artist,album,cover,types:types.join(','),app_nos:appNos.join(','),
+      payment:'success',title,artist,album,cover,app_nos:appNos.join(','),
       submission_no:submissionNo,order_no:orderNo,order_total:total.toFixed(1),
       balance_deduct:deduct.toFixed(1),paid_amount:paid.toFixed(1),submitted_at:'2026-08-26 14:38'
     });
@@ -218,28 +217,28 @@
       const artist=state.get('artist')||'周杰伦';
       const album=state.get('album')||'叶惠美';
       const cover=state.get('cover')||title.slice(0,1);
-      const types=(state.get('types')||'recording,composition').split(',').filter(Boolean);
+      const types=['recording'];
       const submissionNo=state.get('submission_no')||'CRSUB202608260001';
       const orderNo=state.get('order_no')||'CRPAY202608260001';
-      const orderTotal=Number(state.get('order_total')||types.length*39||39);
+      const orderTotal=39;
       const balanceDeduct=Number(state.get('balance_deduct')||0);
       const paidAmount=Number(state.get('paid_amount')||Math.max(0,orderTotal-balanceDeduct));
       const submittedAt=state.get('submitted_at')||'2026-08-26 14:38';
       const suppliedAppNos=(state.get('app_nos')||'').split(',').filter(Boolean);
       const appNos=types.map((type,index)=>suppliedAppNos[index]||('CR20260826'+String(index+1).padStart(4,'0')));
       const rowsHTML=types.map((type,index)=>{
-        const siblingIndex=types.length>1?(index===0?1:0):-1;
+        const siblingIndex=-1;
         const q=new URLSearchParams({
           status:'pending_accept',title,artist,album,cover,type,
           app_no:appNos[index],submission_no:submissionNo,order_no:orderNo,
           submission_count:String(types.length),order_total:orderTotal.toFixed(1),
           balance_deduct:balanceDeduct.toFixed(1),paid_amount:paidAmount.toFixed(1),
-          paired:types.length>1?'1':'0',
+          paired:'0',
           sibling_type:siblingIndex>=0?(types[siblingIndex]||''):'',
           sibling_app_no:siblingIndex>=0?(appNos[siblingIndex]||''):'',
           sibling_status:siblingIndex>=0?'pending_accept':''
         });
-        return `<tr class="${types.length>1?'same-submission':''}"><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">同次提交 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel(type))}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
+        return `<tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">${escapeHTML(cover)}</div><div class="work-copy"><div class="work-title">${escapeHTML(title)}</div><div class="work-artist">${escapeHTML(artist)} · ${escapeHTML(album)}</div><div class="group-note">同次提交 · ${escapeHTML(submissionNo)}</div></div></div></td><td><span class="type-tag">${escapeHTML(registrationLabel(type))}</span></td><td><span class="status processing"><i class="status-dot"></i>待受理</span></td><td><span class="date">${escapeHTML(submittedAt)}</span></td><td><a class="action-link" href="registration-detail.html?${q.toString()}">查看详情</a></td></tr>`;
       }).join('');
       pendingRow.insertAdjacentHTML('beforebegin',rowsHTML);
       pendingRow.remove();
@@ -250,7 +249,7 @@
 
       const toast=document.getElementById('toast');
       if(toast){
-        toast.textContent='支付成功，已生成 '+types.length+' 条独立登记申请';
+        toast.textContent='支付成功，登记申请已生成';
         toast.classList.add('show');
         setTimeout(()=>toast.classList.remove('show'),2200);
       }
@@ -269,7 +268,7 @@
       if(head&&!document.querySelector('.supplement-edit-banner')){
         const banner=document.createElement('div');
         banner.className='supplement-edit-banner';
-        banner.innerHTML='<span class="supplement-edit-badge">待补证</span><div class="supplement-edit-copy"><strong>需要你补充当前申请材料</strong><span>补正所需时间不计算在官方 30 个工作日办理时限内。另一条同次提交申请会继续按自己的状态办理。</span><div class="supplement-edit-requirement">补正要求：请重新核对并上传当前申请的主体证明材料。</div></div>';
+        banner.innerHTML='<span class="supplement-edit-badge">待补证</span><div class="supplement-edit-copy"><strong>需要你补充当前申请材料</strong><span>补正所需时间不计算在官方 30 个工作日办理时限内。</span><div class="supplement-edit-requirement">补正要求：请重新核对并上传当前申请的主体证明材料。</div></div>';
         head.insertAdjacentElement('afterend',banner);
       }
       const next=document.getElementById('nextBtn');
@@ -319,9 +318,8 @@
         const artist=p.get('artist')||parts[0]||'';
         const album=p.get('album')||parts.slice(1).join(' · ');
         const cover=p.get('cover')||document.getElementById('songCover')?.textContent?.trim()||title.slice(0,1);
-        const types=[...document.querySelectorAll('.type-card.selected')].map(card=>card.dataset.type).filter(Boolean);
-        const amount=(types.length*39).toFixed(1);
-        const q=new URLSearchParams({title,artist,album,cover,types:types.join(','),amount});
+        const amount='39.0';
+        const q=new URLSearchParams({title,artist,album,cover,amount});
         location.href='registration-step2.html?'+q.toString();
       },true);
     }
