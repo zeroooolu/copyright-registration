@@ -41,10 +41,11 @@
   </aside></div>
 </template>
 <div class="supp-overlay" id="suppOverlay" aria-hidden="true"><div class="supp-drawer" role="dialog" aria-modal="true" aria-labelledby="suppDrawerTitle">
-  <div class="supp-drawer-head"><div><h2 id="suppDrawerTitle">发起材料补充</h2><p>针对当前登记申请指定附件及具体要求</p></div><button type="button" class="ra-btn" id="suppClose">关闭</button></div>
+  <div class="supp-drawer-head"><div><h2 id="suppDrawerTitle">发起材料补充</h2><p>填写补证说明，可选具体附件交由用户处理</p></div><button type="button" class="ra-btn" id="suppClose">关闭</button></div>
   <div class="supp-drawer-body">
     <div class="supp-form-group"><label class="supp-form-label">补充来源</label><div class="supp-radio-row"><label><input type="radio" name="suppSource" value="official" checked> 官方补正</label><label><input type="radio" name="suppSource" value="platform"> 平台审核退回</label></div></div>
-    <div class="supp-form-group"><label class="supp-form-label">选择附件及补充要求（至少一项）</label><div id="suppOptions"></div></div>
+    <div class="supp-form-group"><label class="supp-form-label" for="suppDescription">补证说明 <span style="color:#d45c50">*</span></label><textarea id="suppDescription" class="supp-review-input" rows="4" maxlength="2000" placeholder="填写官方退回或平台审核的原始要求。例如：请提交签署完整的授权材料，并补充清晰的作品音频。"></textarea><div class="supp-form-hint">说明将直接展示给用户；仅填写此项也可以发起补证。</div></div>
+    <div class="supp-form-group"><label class="supp-form-label">指定补充附件（选填）</label><div class="supp-form-hint" style="margin:-3px 0 12px">不勾选附件时，由用户根据补证说明自行上传，并选择每个文件的附件类型。</div><div id="suppOptions"></div></div>
 
   </div>
   <div class="supp-drawer-foot"><button type="button" class="ra-btn" id="suppCancel">取消</button><button type="button" class="ra-btn primary" id="suppCreate">确认发起材料补充</button></div>
@@ -117,7 +118,7 @@
   $('previewFront').href=preview.toString();
   const flags=[...document.querySelectorAll('[data-flag]')];
   const opts=$('suppOptions');
-  opts.innerHTML=S.MATERIALS.filter(m=>m.key!=='other').map(m=>'<div class="supp-option" data-material="'+m.key+'"><label class="supp-option-title"><span><input type="checkbox" class="supp-pick"> '+e(m.name)+'</span><small>'+e(S.getAttachment(id,m.key,m.key==='audio'?d[0]+'.wav':m.file||'').entries.map(x=>x.name).join('、')||'未上传')+'</small></label><div class="supp-option-fields"><div><label>处理方式</label><select class="supp-mode"><option value="replace">替换当前文件</option><option value="append">补充新附件</option></select></div><div><label>问题类型</label><select class="supp-reason">'+S.TYPES.map(t=>'<option value="'+t.value+'">'+e(t.label)+'</option>').join('')+'</select></div><div class="span2"><label>具体补充要求 *</label><textarea class="supp-requirement" placeholder="具体说明附件哪里不合格、需要如何修改"></textarea></div></div></div>').join('');
+  opts.innerHTML=S.MATERIALS.filter(m=>m.key!=='other').map(m=>'<div class="supp-option" data-material="'+m.key+'"><label class="supp-option-title"><span><input type="checkbox" class="supp-pick"> '+e(m.name)+'</span><small>'+e(S.getAttachment(id,m.key,m.key==='audio'?d[0]+'.wav':m.file||'').entries.map(x=>x.name).join('、')||'未上传')+'</small></label><div class="supp-option-fields"><div><label>处理方式</label><select class="supp-mode"><option value="replace">替换当前文件</option><option value="append">补充新附件</option></select></div><div><label>问题类型</label><select class="supp-reason">'+S.TYPES.map(t=>'<option value="'+t.value+'">'+e(t.label)+'</option>').join('')+'</select></div><div class="span2"><label>该附件的补充要求（选填）</label><textarea class="supp-requirement" placeholder="可针对该附件补充说明，留空则以顶部补证说明为准"></textarea></div></div></div>').join('');
   opts.querySelectorAll('.supp-option').forEach(el=>{
     const k=el.dataset.material;
     if(k==='extra_authorization')el.querySelector('.supp-mode').value='append';
@@ -132,9 +133,10 @@
       el.querySelector('.supp-option-title small').textContent=current.entries.map(x=>x.name).join('、')||'未上传';
       const selected=preselect===el.dataset.material;
       el.querySelector('.supp-pick').checked=selected;el.classList.toggle('checked',selected);
-      el.querySelector('.supp-requirement').value=selected?'请重新上传清晰、完整且符合登记要求的文件。':'';
+      el.querySelector('.supp-requirement').value='';
     });
     document.querySelector('input[name="suppSource"][value="official"]').checked=true;
+    $('suppDescription').value='';
     $('suppOverlay').classList.add('open');$('suppOverlay').setAttribute('aria-hidden','false');
   }
   $('requestBtn').onclick=()=>open();
@@ -145,14 +147,18 @@
   $('suppCreate').onclick=()=>{
     const source=document.querySelector('input[name="suppSource"]:checked').value;
     const selected=[...opts.querySelectorAll('.supp-option.checked')];
-    if(!selected.length)return alert('请至少选择一个附件');
+    const description=$('suppDescription').value.trim();
+    if(!description){$('suppDescription').focus();return alert('请先填写补证说明')}
     const items=selected.map(el=>{
       const key=el.dataset.material,m=S.MATERIALS.find(x=>x.key===key);
-      return {key,original:S.getAttachment(id,key,key==='audio'?d[0]+'.wav':m.file||'').entries.map(x=>x.name).join('、'),mode:el.querySelector('.supp-mode').value,reason:el.querySelector('.supp-reason').value,requirement:el.querySelector('.supp-requirement').value.trim()};
+      const current=S.getAttachment(id,key,key==='audio'?d[0]+'.wav':m.file||'');
+      return {key,original:current.entries.map(x=>x.name).join('、'),
+        mode:current.entries.length?el.querySelector('.supp-mode').value:'append',
+        reason:el.querySelector('.supp-reason').value,requirement:el.querySelector('.supp-requirement').value.trim()};
     });
-    if(items.some(i=>!i.requirement))return alert('请为每项选中的附件填写具体补充要求');
+
     try{
-      S.create({appNo:id,source,triggerStatus:d[4],items});
+      S.create({appNo:id,source,triggerStatus:d[4],workTitle:d[0],description,items});
       close();render();
     }catch(err){alert(err.message)}
   };
@@ -169,11 +175,14 @@
       const badge=r.status==='completed'?'done':r.status==='needs_upload'?'warn':'';
 
       const meta='<div class="supp-request-line">发起人：'+e(r.operator)+' · 发起时间：'+e(r.createdAt)+'</div>';
-      const items=r.items.map(i=>'<div class="supp-record-item"><div><strong>'+e(i.name)+'</strong><small>'+(i.mode==='replace'?'替换原文件':'补充新附件')+' · '+e(S.TYPES.find(x=>x.value===i.reason)?.label||'其他')+'</small></div><div><p>'+e(i.requirement)+'</p><small>原文件：'+e(i.original||'未上传')+'　→　最新：'+e(i.replacement?.name||'待上传')+(i.approved?' · 已复核':'')+'</small>'+(i.versions.length>1?'<small>历史上传：'+i.versions.map(v=>e(v.name)+'（'+e(v.at)+'）').join('；')+'</small>':'')+(r.status==='reviewing'?'<label style="display:block;margin-top:7px"><input type="checkbox" data-reject="'+i.key+'" data-rid="'+r.id+'"> 本附件仍需补充</label>':'')+'</div></div>').join('');
+      const explanation=e(r.description||r.officialNote||'');
+      const items=r.items.map(i=>'<div class="supp-record-item"><div><strong>'+e(i.name)+'</strong><small>'+(i.mode==='replace'?'替换原文件':'补充新附件')+' · '+e(S.TYPES.find(x=>x.value===i.reason)?.label||'其他')+'</small></div><div><p>'+e(i.requirement)+'</p><small>原文件：'+e(i.original||'未上传')+'　→　最新：'+e(i.replacement?.name||'待上传')+(i.approved?' · 已复核':'')+'</small>'+(i.versions.length>1?'<small>历史上传：'+i.versions.map(v=>e(v.name)+'（'+e(v.at)+'）').join('；')+'</small>':'')+(r.status==='reviewing'?'<label style="display:block;margin-top:7px"><input type="checkbox" data-reject="'+e(S.attachmentId(i))+'" data-rid="'+r.id+'"> 本附件仍需补充</label>':'')+'</div></div>').join('');
       let actions='';
       if(r.status==='reviewing')actions='<div class="supp-review"><div class="supp-review-row"><strong>材料复核</strong><span class="ra-sub">勾选仍不合格的附件可再次退回</span></div><textarea class="supp-review-input" id="reviewNote" placeholder="复核说明 / 再次补充要求（再次退回时必填）"></textarea><div class="supp-record-actions"><button type="button" class="ra-btn" data-act="reject">再次要求补充</button><button type="button" class="ra-btn primary" data-act="approve">确认材料通过</button></div></div>';
       if(r.status==='awaiting_official')actions='<div class="supp-review"><strong>官方补正：等待提交官方</strong><p class="supp-toolbar-note">用户上传只是提交到平台，材料复核通过后需运营确认已转交官方。</p><input class="supp-review-input" id="officialReceipt" placeholder="官方提交凭证编号 / 提交说明（必填）"><div class="supp-record-actions"><button type="button" class="ra-btn primary" data-act="send">确认已提交官方</button></div></div>';
-      return '<div class="supp-record"><div class="supp-record-head"><div><strong>'+e(r.id)+' · '+S.sourceText(r.source)+'</strong><small>'+r.items.length+' 项附件</small></div><span class="supp-badge '+badge+'">'+S.statusText(r.status)+'</span></div><div class="supp-record-body">'+meta+items+actions+'<div class="supp-toolbar-note">流转记录：'+r.events.map(x=>e(x.at)+' '+e(x.label)).join(' · ')+'</div></div></div>';
+      return '<div class="supp-record"><div class="supp-record-head"><div><strong>'+e(r.id)+' · '+S.sourceText(r.source)+'</strong><small>'+(r.selectionMode==='self'?'用户自行选择附件':r.items.length+' 项指定附件')+'</small></div><span class="supp-badge '+badge+'">'+S.statusText(r.status)+'</span></div><div class="supp-record-body">'+meta+
+      (explanation?'<div class="supp-description"><strong>补证说明</strong><p>'+explanation+'</p></div>':'')+
+      (!r.items.length?'<p class="supp-unassigned">未指定附件，等待用户按补证说明自行选择附件类型并上传。</p>':'')+items+actions+'<div class="supp-toolbar-note">流转记录：'+r.events.map(x=>e(x.at)+' '+e(x.label)).join(' · ')+'</div></div></div>';
     }).join('');
     root.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=()=>{
       const action=btn.dataset.act;
