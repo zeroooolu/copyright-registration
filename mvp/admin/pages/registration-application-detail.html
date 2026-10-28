@@ -158,7 +158,7 @@
     });
 
     try{
-      S.create({appNo:id,source,triggerStatus:d[4],workTitle:d[0],description,items});
+      S.create({appNo:id,source,triggerStatus:d[4],workTitle:d[0],appSource:d[5],description,items});
       close();render();
     }catch(err){alert(err.message)}
   };
