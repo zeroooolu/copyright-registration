@@ -9,12 +9,14 @@
   const icons={
     home:'<svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
     applications:'<svg viewBox="0 0 24 24"><path d="M6 3.5h9l3 3V20H6V3.5Z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15 3.5v3h3M9 10h6M9 14h6M9 18h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+    certificates:'<svg viewBox="0 0 24 24"><path d="M5 3h14v15l-4 3-3-2-3 2-4-3V3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="m8 9 3 3 5-5M8 16h8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
     submissions:'<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 9h8M8 13h8M8 17h5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>'
   };
   const items=[
     {id:'home',label:'首页',href:root+'/index.html'},
     {id:'applications',label:'登记申请',href:root+'/pages/registration-applications.html'},
-    {id:'submissions',label:'提交记录',href:root+'/pages/registration-submissions.html'}
+    {id:'submissions',label:'提交记录',href:root+'/pages/registration-submissions.html'},
+    {id:'certificates',label:'证书上传',href:root+'/pages/certificate-upload.html'}
   ];
   const shell=document.getElementById('admin-shell');
   if(!shell)return;
