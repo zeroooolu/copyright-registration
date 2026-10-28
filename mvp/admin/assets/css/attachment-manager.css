@@ -6,6 +6,7 @@
 .att-entry-main svg{flex:none;color:#7282a0;margin-top:2px}
 .att-entry-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
 .att-entry-name{font-size:12px;color:#3863af;overflow-wrap:anywhere;line-height:1.5}
+.att-preview{border:0;background:transparent;padding:0;text-align:left;cursor:pointer;font-family:inherit;max-width:100%;word-break:break-word}.att-preview:hover{text-decoration:underline}
 .att-entry-sub{font-size:10px;color:#97a3b0;line-height:1.5}
 .att-entry-actions{flex:none;display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
 .att-small-action{font:inherit;font-size:11px!important;color:#3163bf!important;background:transparent!important;border:0!important;cursor:pointer;padding:3px!important;white-space:nowrap}
