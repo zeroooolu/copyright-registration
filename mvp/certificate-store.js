@@ -56,6 +56,10 @@
       // Mock only: real integration must call the authenticated server-side API.
       if(!a.regNumberDemo){result.push({id,code:'not_ready',message:'模拟接口暂未返回登记号'});return}
       const number=normalizeReg(a.regNumberDemo);
+      const issued=getDelivered(id);
+      if(issued&&normalizeReg(issued.regNumber)!==number){
+        result.push({id,code:'issued_locked',message:'已发放证书登记号不同，需人工复核'});return;
+      }
       if(previous[id]?.source==='manual'){
         result.push({id,code:'manual_kept',message:'已有人工核验登记号，未覆盖'});return;
       }
@@ -70,6 +74,10 @@
   function bindManually(id,number){
     const a=app(id);if(!a)throw Error('未找到登记申请');
     const normalized=extractReg(number);if(!normalized)throw Error('作品登记号格式不正确');
+    const issued=getDelivered(id);
+    if(issued&&normalizeReg(issued.regNumber)!==normalizeReg(normalized)){
+      throw Error('申请已有已发放证书，禁止直接改动作品登记号；需走换证复核流程');
+    }
     const map=regMap(),collision=Object.entries(map).find(([k,v])=>k!==id&&normalizeReg(v.number)===normalizeReg(normalized));
     if(collision)throw Error('该登记号已经关联 '+collision[0]);
     map[id]={number:normalized,workId:a.workId,source:'manual',syncedAt:now()};
@@ -110,18 +118,31 @@
   }
   const getRecord=id=>all().find(x=>x.id===id)||null;
   const getDelivered=id=>all().find(x=>x.appId===id&&x.delivery==='delivered')||null;
+  async function fingerprint(file){
+    if(!file.arrayBuffer||!global.crypto?.subtle)return '';
+    try{
+      const bytes=await file.arrayBuffer();
+      const digest=await global.crypto.subtle.digest('SHA-256',bytes);
+      return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+    }catch(_){return ''}
+  }
   async function upload(file){
     if(!file||!file.name)throw Error('请选择 PNG 证书');
     if(file.size>MAX_BYTES)throw Error('单张 PNG 不得超过 20MB');
     if(!/\.png$/i.test(file.name))throw Error('只支持 PNG 图片');
     if(file.type&&file.type!=='image/png')throw Error('文件类型不是 PNG');
+    const hash=await fingerprint(file);
+    const duplicatedFile=hash&&all().find(r=>r.hash===hash);
     const id='CERT'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6);
     await putBlob(id,file);
     const fromFile=extractReg(file.name);
-    const item={id,fileName:file.name,fileSize:file.size,createdAt:now(),regNumber:fromFile,
+    const item={id,fileName:file.name,fileSize:file.size,hash,createdAt:now(),regNumber:fromFile,
       workName:'',owner:'',ocrText:'',recognition:fromFile?'filename':'pending',
       matchStatus:'unreadable',matchReason:'待识别',appId:null,delivery:'pending',deliveredAt:null};
-    const m=match(item.regNumber);item.matchStatus=m.status;item.matchReason=m.reason;item.appId=m.appId;
+    const m=match(item.regNumber);
+    item.matchStatus=duplicatedFile?'duplicate':m.status;
+    item.matchReason=duplicatedFile?'PNG 文件内容重复上传':m.reason;
+    item.appId=duplicatedFile?null:m.appId;
     const list=all();list.unshift(item);save(META_KEY,list);return copy(item);
   }
   function patch(id,changes){
@@ -129,9 +150,11 @@
     if(items[pos].delivery==='delivered')throw Error('已发放证书不可直接修改，请走人工换证流程');
     Object.assign(items[pos],changes);
     const m=match(items[pos].regNumber,items[pos].workName,items[pos].owner);
-    const dup=items.find(x=>x.id!==id&&normalizeReg(x.regNumber)&&normalizeReg(x.regNumber)===normalizeReg(items[pos].regNumber));
+    const dup=items.find(x=>x.id!==id&&(
+      (normalizeReg(x.regNumber)&&normalizeReg(x.regNumber)===normalizeReg(items[pos].regNumber))||
+      (x.hash&&items[pos].hash&&x.hash===items[pos].hash)));
     items[pos].matchStatus=dup?'duplicate':m.status;
-    items[pos].matchReason=dup?'本批次已存在相同作品登记号':m.reason;
+    items[pos].matchReason=dup?'登记号或 PNG 文件重复':m.reason;
     items[pos].appId=dup?null:m.appId;
     save(META_KEY,items);return copy(items[pos]);
   }
@@ -139,7 +162,9 @@
     const items=all();let changed=false;
     items.filter(x=>x.delivery!=='delivered').forEach(x=>{
       const m=match(x.regNumber,x.workName,x.owner);
-      const dup=items.find(y=>y.id!==x.id&&normalizeReg(y.regNumber)&&normalizeReg(y.regNumber)===normalizeReg(x.regNumber));
+      const dup=items.find(y=>y.id!==x.id&&(
+        (normalizeReg(y.regNumber)&&normalizeReg(y.regNumber)===normalizeReg(x.regNumber))||
+        (x.hash&&y.hash&&x.hash===y.hash)));
       x.matchStatus=dup?'duplicate':m.status;x.matchReason=dup?'本批次存在相同作品登记号':m.reason;x.appId=dup?null:m.appId;changed=true;
     });
     if(changed)save(META_KEY,items);
@@ -151,7 +176,9 @@
       if(!r){rejected.push({id,reason:'记录不存在'});return}
       if(r.delivery==='delivered'){rejected.push({id,reason:'已经发放'});return}
       const m=match(r.regNumber,r.workName,r.owner);
-      const duplicate=list.some(x=>x.id!==id&&normalizeReg(x.regNumber)===normalizeReg(r.regNumber));
+      const duplicate=list.some(x=>x.id!==id&&(
+        normalizeReg(x.regNumber)===normalizeReg(r.regNumber)||
+        (x.hash&&r.hash&&x.hash===r.hash)));
       const delivered=list.find(x=>x.id!==id&&x.delivery==='delivered'&&x.appId===m.appId&&m.appId);
       if(m.status!=='matched'||duplicate||delivered){
         rejected.push({id,reason:duplicate?'登记号重复':delivered?'该申请已有已发放证书':m.reason});return
