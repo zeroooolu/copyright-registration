@@ -48,6 +48,9 @@
   const examples={
     CR202608250001:['青花瓷','看见音乐（上海）有限公司','看见音乐','待初审','pending_first_review','self','2026-08-25 14:32:00','—'],
     CR202609030001:['晴天','看见音乐（上海）有限公司','看见音乐','待初审','pending_first_review','self','2026-09-03 16:20:18','—'],
+    CR202609030002:['夜曲','星海音乐工作室','看见音乐','待受理','pending_accept','self','2026-09-03 17:05:42','—'],
+    CR202609020011:['凌晨三点的城市','Miro Studio','看见音乐','待登记','pending_registration','self','2026-09-02 14:36:10','—'],
+    CR202609010006:['慢慢走','周棠音乐','看见音乐','待复审','pending_re_review','self','2026-09-01 10:22:09','—'],
     CR202609030003:['溺空','姚晓雄','欢唱','待受理','pending_accept','batch','2026-09-03 17:07:11','5650902849421523'],
     CR202608270021:['青苔经过晨岸','欢唱网络科技（上海）有限公司','欢唱','待登记','pending_registration','batch','2026-08-27 18:04:34','5641044037206017'],
     CR202608270022:['山寺初有春水','欢唱网络科技（上海）有限公司','欢唱','待登记','pending_registration','batch','2026-08-27 18:04:34','5641043835879516'],
@@ -64,17 +67,18 @@
   $('sourceText').textContent=d[5]==='self'?'用户自助':'后台批量';
   $('cpName').textContent=d[1];$('ownerName').textContent=d[1];$('applicantName').textContent=d[1];
   $('agency').textContent=d[2];$('statusName').textContent=d[3];
+  document.querySelector('[data-preview="audio"]').textContent=d[0]+'.wav';
   const self=d[5]==='self';
   document.querySelectorAll('.self-only').forEach(n=>n.hidden=!self);
   document.querySelectorAll('.legacy-only').forEach(n=>n.hidden=self);
   if(!self){document.querySelectorAll('.self-only').forEach(n=>n.style.display='none');document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='');}
   else document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='none');
   const preview=new URL('../../frontend/star-release/registration-detail.html',location.href);
-  preview.search=new URLSearchParams({status:d[4],app_no:id,title:d[0],registration_name:d[0],artist:d[1],order_total:'39',paid_amount:'39'}).toString();
+  preview.search=new URLSearchParams({status:d[4],app_no:id,title:d[0],registration_name:d[0],artist:id==='CR202608250001'||id==='CR202609030001'?'周杰伦':d[1],order_total:'39',paid_amount:'39'}).toString();
   $('previewFront').href=preview.toString();
   const flags=[...document.querySelectorAll('[data-flag]')];
   const opts=$('suppOptions');
-  opts.innerHTML=S.MATERIALS.map(m=>'<div class="supp-option" data-material="'+m.key+'"><label class="supp-option-title"><span><input type="checkbox" class="supp-pick"> '+e(m.name)+'</span><small>'+e(m.file||'未上传')+'</small></label><div class="supp-option-fields"><div><label>处理方式</label><select class="supp-mode"><option value="replace">替换当前文件</option><option value="append">补充新附件</option></select></div><div><label>问题类型</label><select class="supp-reason">'+S.TYPES.map(t=>'<option value="'+t.value+'">'+e(t.label)+'</option>').join('')+'</select></div><div class="span2"><label>具体补充要求 *</label><textarea class="supp-requirement" placeholder="具体说明附件哪里不合格、需要如何修改"></textarea></div></div></div>').join('');
+  opts.innerHTML=S.MATERIALS.map(m=>'<div class="supp-option" data-material="'+m.key+'"><label class="supp-option-title"><span><input type="checkbox" class="supp-pick"> '+e(m.name)+'</span><small>'+e(m.key==='audio'?d[0]+'.wav':m.file||'未上传')+'</small></label><div class="supp-option-fields"><div><label>处理方式</label><select class="supp-mode"><option value="replace">替换当前文件</option><option value="append">补充新附件</option></select></div><div><label>问题类型</label><select class="supp-reason">'+S.TYPES.map(t=>'<option value="'+t.value+'">'+e(t.label)+'</option>').join('')+'</select></div><div class="span2"><label>具体补充要求 *</label><textarea class="supp-requirement" placeholder="具体说明附件哪里不合格、需要如何修改"></textarea></div></div></div>').join('');
   opts.querySelectorAll('.supp-option').forEach(el=>{
     const k=el.dataset.material;
     if(k==='extra_authorization'||k==='other')el.querySelector('.supp-mode').value='append';
@@ -105,7 +109,7 @@
     if(!selected.length)return alert('请至少选择一个附件');
     const items=selected.map(el=>{
       const key=el.dataset.material,m=S.MATERIALS.find(x=>x.key===key);
-      return {key,original:m.file,mode:el.querySelector('.supp-mode').value,reason:el.querySelector('.supp-reason').value,requirement:el.querySelector('.supp-requirement').value.trim()};
+      return {key,original:key==='audio'?d[0]+'.wav':m.file,mode:el.querySelector('.supp-mode').value,reason:el.querySelector('.supp-reason').value,requirement:el.querySelector('.supp-requirement').value.trim()};
     });
     if(items.some(i=>!i.requirement))return alert('请为每项选中的附件填写具体补充要求');
     try{
