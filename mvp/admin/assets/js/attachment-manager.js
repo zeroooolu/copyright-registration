@@ -4,7 +4,7 @@
 const S=window.CopyrightSupplement;if(!S)return;
 const esc=S.escapeHTML;
 const appNo=new URLSearchParams(location.search).get('id')||'CR202609030001';
-const labels={'作品附件':'audio','证件附件':'identity','原授权书':'authorization','补充授权书':'extra_authorization','其他证明材料':'other','代理委托书':'agent_authorization'};
+const labels={'作品附件':'audio','证件附件':'identity','原授权书':'authorization','补充授权书':'extra_authorization','代理委托书':'agent_authorization'};
 const fields=new Map(),opened=new Set();
 document.querySelectorAll('.info-row').forEach(function(row){
  const name=row.querySelector('.k')?.textContent.trim(),key=labels[name];
@@ -26,7 +26,7 @@ overlay.innerHTML='<div class="att-dialog" role="dialog" aria-modal="true" aria-
  +'<p class="att-dialog-help" id="attFileHint"></p><label class="att-dialog-label" for="attDialogNote">操作说明（选填）</label>'
  +'<textarea class="att-dialog-textarea" id="attDialogNote" placeholder="例如：根据官方补正意见替换盖章版"></textarea>'
  +'<div class="att-dialog-error" id="attDialogError" aria-live="polite"></div>'
- +'<div class="supp-demo-note">原型仅保存文件名、格式、大小和操作历史，不上传文件本体。实际预览、下载及存储需后端接入。</div></div>'
+ +'</div>'
  +'<div class="att-dialog-footer"><button type="button" class="ra-btn" id="attDialogCancel">取消</button><button type="button" class="ra-btn primary" id="attDialogConfirm">确认上传</button></div></div>';
 document.body.appendChild(overlay);
 const $=id=>document.getElementById(id);
