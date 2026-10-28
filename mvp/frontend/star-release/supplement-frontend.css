@@ -22,3 +22,27 @@
 .supp-front-submit{height:38px;border:1px solid #2448ff;background:#2448ff;color:#fff;font-size:12px;border-radius:4px;padding:0 18px;cursor:pointer}
 .supp-front-submit:disabled{background:#bec5d0;border-color:#bec5d0;cursor:not-allowed}
 .supp-front-activity{font-size:11px;color:#8c98a8;border-top:1px solid #e6eaef;padding-top:12px;margin-top:14px;line-height:1.9}
+
+
+/* Written correction and customer-selected file categories */
+.supp-front-note strong{display:block;color:#465a7b;margin-bottom:7px;font-size:12px}
+.supp-front-note p{white-space:pre-wrap;font-size:12px;line-height:1.85;margin:0;overflow-wrap:anywhere;color:#55667e}
+.supp-front-type{font-size:11px;color:#9a631a;background:#fff3dd;border-radius:3px;padding:4px 8px;display:inline-flex;margin-bottom:8px}
+.supp-free-head{margin:0 0 14px}
+.supp-free-head strong{font-size:14px;color:#38495d}
+.supp-free-head p{font-size:12px;line-height:1.75;color:#7e8da0;margin:6px 0}
+.supp-free-rows{display:flex;flex-direction:column;gap:12px}
+.supp-free-row{border:1px solid #e0e6ef;border-radius:7px;background:#fdfdff;padding:14px}
+.supp-free-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.supp-free-title strong{font-size:12px;color:#43536b}
+.supp-free-remove{border:0;background:transparent;padding:4px;color:#9b6070;font-size:11px;cursor:pointer}
+.supp-free-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,.72fr);gap:13px}
+.supp-free-fields label{display:flex;flex-direction:column;gap:7px;font-size:11px;color:#667589}
+.supp-free-fields label span{color:#c75655}
+.supp-free-fields input,.supp-free-fields select{display:block;max-width:100%;width:100%;height:36px;box-sizing:border-box;background:#fff;border:1px solid #cbd5e3;border-radius:5px;padding:7px;color:#43536b;font-size:12px}
+.supp-free-file-name{font-size:11px;color:#8291a3;margin-top:10px;overflow-wrap:anywhere}
+.supp-free-error{font-size:11px;color:#bf5355;line-height:1.55;margin-top:5px}
+.supp-free-error:empty{display:none}
+.supp-free-add{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px dashed #b8c8eb;border-radius:5px;color:#3c5dbe;background:#f8faff;font-size:12px;padding:10px 14px;margin-top:12px;cursor:pointer}
+.supp-free-add:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:920px){.supp-free-fields{grid-template-columns:1fr}}
