@@ -74,6 +74,11 @@ function showSupplement(){
     document.getElementById('statusDesc').textContent=explain;
     document.getElementById('sideDesc').textContent=explain;
     document.getElementById('statusLine').className='status-line '+(need?'status-warning':'status-normal');
+    if(req.source==='official'){
+      const nodes=[...document.querySelectorAll('#officialFlow .flow-item')];
+      nodes.forEach(n=>n.classList.remove('current'));
+      if(nodes[1])nodes[1].classList.add('current','branch');
+    }
     const notice=document.getElementById('notice');
     notice.className='notice'+(need?' warning':'');
     document.getElementById('noticeText').textContent=source+'：'+explain;
@@ -96,7 +101,7 @@ function showSupplement(){
     const reason=S.TYPES.find(x=>x.value===item.reason)?.label||'';
     const detail=item.requirement?'<p>'+esc(item.requirement)+'</p>':'';
     return '<div class="supp-front-item"><div class="supp-front-item-head"><strong>'+esc(item.name)+'</strong>'+badge+'</div>'+
-      (record.selectionMode==='specified'&&reason?'<div class="supp-front-type">'+esc(reason)+'</div>':'')+detail+
+      (record.selectionMode==='specified'&&item.reason&&item.reason!=='other'&&reason?'<div class="supp-front-type">'+esc(reason)+'</div>':'')+detail+
       '<div class="supp-front-fileline">处理方式：'+(item.mode==='replace'?'替换原文件':'补充新附件')+' · 原文件：'+esc(item.original||'未上传')+'</div>'+
       (finalName?'<div class="supp-front-fileline">最新提交：'+esc(finalName)+(item.versions.length>1?' · 共提交 '+item.versions.length+' 次':'')+'</div>':'')+upload+'</div>';
   }).join('');
