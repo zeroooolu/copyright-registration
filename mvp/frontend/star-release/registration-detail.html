@@ -27,7 +27,7 @@
 
 <section class="card action-card"><div class="action-status"><small>当前状态</small><strong id="sideStatus">待受理</strong><p id="sideDesc"></p></div><div class="action-body" id="actionBody"><div class="deadline"><span>官方办理时限</span><strong id="deadlineTitle"></strong><p id="deadlineText"></p></div><button class="secondary" id="secondaryBtn" type="button">返回我的登记</button></div></section>
 </aside></div>
-</div></main><script src="star-release-shell.js"></script><script src="../../supplement-store.js"></script><script src="../../certificate-store.js"></script><script>
+</div></main><script src="star-release-shell.js"></script><script src="../../supplement-store.js"></script><script src="supplement-free-upload.js"></script><script src="../../certificate-store.js"></script><script>
 (()=>{
 const p=new URLSearchParams(location.search),status=p.get('status')||'pending_accept',title=p.get('title')||'青花瓷',artist=p.get('artist')||'周杰伦',album=p.get('album')||'我很忙',cover=p.get('cover')||title.slice(0,1),registrationName=p.get('registration_name')||title,appNo=p.get('app_no')||'CR202608260001',submissionNo=p.get('submission_no')||'CRSUB202608260001',orderNo=p.get('order_no')||'CRPAY202608260001',orderTotal=39,paid=Number(p.get('paid_amount')||orderTotal);
 const money=n=>'¥'+Number(n).toFixed(2);
@@ -70,7 +70,7 @@ function showSupplement(){
   if(req){
     document.getElementById('statusName').textContent=stateLabel;
     document.getElementById('sideStatus').textContent=stateLabel;
-    const explain=need?'请仅上传本次指定的材料，其余登记资料无需修改。':reviewing?'补充材料已提交至看见音乐平台，等待复核。':'材料已通过平台复核，等待工作人员提交官方。';
+    const explain=need?(record.items.length?'请按具体要求上传指定附件，其余登记资料无需修改。':'请根据补证说明自行上传附件并选择附件类型。'):reviewing?'补充材料已提交至看见音乐平台，等待复核。':'材料已通过平台复核，等待工作人员提交官方。';
     document.getElementById('statusDesc').textContent=explain;
     document.getElementById('sideDesc').textContent=explain;
     document.getElementById('statusLine').className='status-line '+(need?'status-warning':'status-normal');
@@ -80,29 +80,50 @@ function showSupplement(){
     document.getElementById('deadlineTitle').textContent='补充材料处理中';
     document.getElementById('deadlineText').textContent=record.source==='official'?'用户上传后仍需平台复核和确认转交官方；在线提交不等于已提交登记机构。':'材料经平台复核后恢复原办理阶段。';
   }
-  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+source+' · '+record.items.length+' 项附件需要处理</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
+  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+source+' · '+(record.selectionMode==='self'?'用户自行选择附件':record.items.length+' 项指定附件')+'</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
+  const explanation=String(record.description||record.officialNote||'').trim();
+  const explanationHTML=explanation?'<div class="supp-front-note"><strong>补证说明</strong><p>'+esc(explanation)+'</p></div>':'';
 
   const items=record.items.map(item=>{
     const open=need&&!item.approved,approved=item.approved,finalName=item.replacement?.name;
     let upload='';
     if(open){
       const accept=S.MATERIALS.find(m=>m.key===item.key)?.accept||'';
-      upload='<div class="supp-front-upload"><label for="suppInput-'+item.key+'">'+(item.mode==='replace'?'重新选择文件':'补充上传文件')+' *</label><input id="suppInput-'+item.key+'" data-supp-file="'+item.key+'" type="file" accept="'+esc(accept)+'"><small data-file-name="'+item.key+'">选择后将显示文件名称，确认无误再提交。</small></div>';
+      const itemId=S.attachmentId(item);
+      upload='<div class="supp-front-upload"><label for="suppInput-'+esc(itemId)+'">'+(item.mode==='replace'?'重新选择文件':'补充上传文件')+' *</label><input id="suppInput-'+esc(itemId)+'" data-supp-file="'+esc(itemId)+'" data-supp-type="'+esc(item.key)+'" type="file" accept="'+esc(accept)+'"><small data-file-name="'+esc(itemId)+'">选择后将显示文件名称，确认无误再提交。</small></div>';
     }
     const badge=approved?'<span class="supp-front-item-badge done">本轮已通过</span>':'<span class="supp-front-item-badge">'+(open?'待上传':reviewing?'待复核':'已上传')+'</span>';
-    return '<div class="supp-front-item"><div class="supp-front-item-head"><strong>'+esc(item.name)+'</strong>'+badge+'</div><p>'+esc(item.requirement)+'</p><div class="supp-front-fileline">处理方式：'+(item.mode==='replace'?'替换原文件':'补充新附件')+' · 原文件：'+esc(item.original||'未上传')+'</div>'+(finalName?'<div class="supp-front-fileline">最新提交：'+esc(finalName)+(item.versions.length>1?' · 共提交 '+item.versions.length+' 次':'')+'</div>':'')+upload+'</div>';
+    const reason=S.TYPES.find(x=>x.value===item.reason)?.label||'';
+    const detail=item.requirement?'<p>'+esc(item.requirement)+'</p>':'';
+    return '<div class="supp-front-item"><div class="supp-front-item-head"><strong>'+esc(item.name)+'</strong>'+badge+'</div>'+
+      (record.selectionMode==='specified'&&reason?'<div class="supp-front-type">'+esc(reason)+'</div>':'')+detail+
+      '<div class="supp-front-fileline">处理方式：'+(item.mode==='replace'?'替换原文件':'补充新附件')+' · 原文件：'+esc(item.original||'未上传')+'</div>'+
+      (finalName?'<div class="supp-front-fileline">最新提交：'+esc(finalName)+(item.versions.length>1?' · 共提交 '+item.versions.length+' 次':'')+'</div>':'')+upload+'</div>';
   }).join('');
-  const footer=need?'<div class="supp-front-actions"><p id="suppFrontHint">请完成全部必补项后提交。</p><button type="button" id="suppFrontSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>':reviewing?'<div class="supp-front-note">已提交至看见音乐平台，工作人员复核后会更新状态。无需重复上传。</div>':pendingOfficial?'<div class="supp-front-note">材料已通过复核，工作人员将继续办理官方补正。用户无需操作。</div>':'<div class="supp-front-note">本次补充流程已完成，原登记申请继续办理。</div>';
+  const free=need&&!record.items.length;
+  const footer=free?'':need?'<div class="supp-front-actions"><p id="suppFrontHint">请完成全部必补项后提交。</p><button type="button" id="suppFrontSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>':reviewing?'<div class="supp-front-note">已提交至看见音乐平台，工作人员复核后会更新状态。无需重复上传。</div>':pendingOfficial?'<div class="supp-front-note">材料已通过复核，工作人员将继续办理官方补正。用户无需操作。</div>':'<div class="supp-front-note">本次补充流程已完成，原登记申请继续办理。</div>';
   const events='<div class="supp-front-activity">处理记录：'+record.events.map(evt=>esc(evt.at)+' · '+esc(evt.label)).join('　 /　 ')+'</div>';
-  supplementPanel.innerHTML=intro+'<div class="supp-front-body">'+items+footer+events+'</div>';
+  supplementPanel.innerHTML=intro+'<div class="supp-front-body">'+explanationHTML+items+
+    (free?'<div id="suppFreeRoot"></div>':'')+footer+events+'</div>';
   if(!need)return;
+  if(free){
+    window.CopyrightFreeSupplement.mount(document.getElementById('suppFreeRoot'),S,appNo,()=>{
+      showSupplement();window.scrollTo({top:0,behavior:'smooth'});
+    });
+    return;
+  }
   const inputs=[...supplementPanel.querySelectorAll('[data-supp-file]')];
   const hint=document.getElementById('suppFrontHint'),button=document.getElementById('suppFrontSubmit');
   const valid=()=>{
     const chosen=inputs.filter(inp=>inp.files?.length).length;
-    const sizesOK=inputs.every(inp=>!inp.files?.length||inp.files[0].size<=20*1024*1024);
-    button.disabled=chosen!==inputs.length||!sizesOK;
-    hint.textContent=!sizesOK?'单个附件大小不能超过 20 MB':'已选择 '+chosen+'/'+inputs.length+' 项必补附件';
+    const errors=[];
+    inputs.forEach(inp=>{
+      if(!inp.files?.length)return;
+      try{S.validateAttachmentFile(inp.dataset.suppType,inp.files[0])}
+      catch(err){errors.push(err.message)}
+    });
+    button.disabled=chosen!==inputs.length||errors.length>0;
+    hint.textContent=errors[0]||'已选择 '+chosen+'/'+inputs.length+' 项必补附件';
   };
   inputs.forEach(inp=>inp.addEventListener('change',()=>{
     const file=inp.files?.[0],display=supplementPanel.querySelector('[data-file-name="'+inp.dataset.suppFile+'"]');
