@@ -74,6 +74,7 @@
           identity:/\.(pdf|jpg|jpeg|png)$/i,
           authorization:/\.(pdf|jpg|jpeg|png)$/i,
           extra_authorization:/\.(pdf|jpg|jpeg|png)$/i,
+          agent_authorization:/\.(pdf|jpg|jpeg|png)$/i,
           other:/\.(pdf|jpg|jpeg|png|doc|docx)$/i
         };
         if(!extensions[item.key].test(file.name))throw new Error(item.name+'文件格式不符合要求，请重新选择');
