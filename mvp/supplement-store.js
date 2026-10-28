@@ -32,6 +32,7 @@
   }
   function list(appNo){return all().filter(x=>x.appNo===String(appNo)).sort((a,b)=>b.createdAtMs-a.createdAtMs)}
   function latest(appNo){return list(appNo)[0]||null}
+  function customerTasks(){return all().filter(r=>r.status!=='completed'&&r.appSource==='self').sort((a,b)=>b.createdAtMs-a.createdAtMs)}
   function active(appNo){return list(appNo).find(x=>x.status!=='completed')||null}
   function event(label,detail){return {at:now(),label,detail:detail||''}}
   const attachmentId=item=>item.id||item.key;
@@ -69,7 +70,7 @@
     });
     const record={
       id:'SUP'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase(),
-      appNo:String(payload.appNo),workTitle:String(payload.workTitle||''),
+      appNo:String(payload.appNo),workTitle:String(payload.workTitle||''),appSource:String(payload.appSource||'self'),
       source:payload.source==='official'?'official':'platform',
       description,selectionMode:items.length?'specified':'self',
       triggerStatus:payload.triggerStatus||'pending_accept',
@@ -221,5 +222,5 @@
   const statusText=status=>({needs_upload:'待用户补充',reviewing:'待后台复核',awaiting_official:'待提交官方',completed:'已完成'})[status]||status;
   const sourceText=source=>source==='official'?'官方补正':'平台审核退回';
   const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,create,submit,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile,attachmentId};
+  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,customerTasks,create,submit,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile,attachmentId};
 })(window);
