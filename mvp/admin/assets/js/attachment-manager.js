@@ -69,7 +69,7 @@ function render(){
   const blocked=!!S.active(appNo)?.items.some(x=>x.key===key);
   const entries=info.entries.map((file,index)=>{
    return '<div class="att-entry"><div class="att-entry-main"><span aria-hidden="true">📎</span><div class="att-entry-copy">'
-     +'<span class="att-entry-name">'+esc(file.name)+'</span>'
+     +'<button type="button" class="att-entry-name att-preview" data-att-action="preview" data-att-key="'+key+'" data-att-name="'+esc(file.name)+'">'+esc(file.name)+'</button>'
      +'<span class="att-entry-sub">'+(index===0?'主文件':'补充文件')+' · '+(file.source==='original'?'初始提交':esc(file.operator)+' · '+esc(file.at))+'</span>'
      +'</div></div><div class="att-entry-actions"><button type="button" class="att-small-action" data-att-action="replace" data-att-key="'+key+'" data-att-target="'+esc(file.id)+'" '+(blocked?'disabled':'')+'>替换</button></div></div>';
   }).join('')||'<div class="att-empty">暂无文件</div>';
@@ -91,7 +91,8 @@ document.addEventListener('click',ev=>{
  const btn=ev.target.closest('button[data-att-action]');if(!btn)return;
  const key=btn.dataset.attKey,action=btn.dataset.attAction;
  if(!fields.has(key))return;
- if(action==='history'){opened.has(key)?opened.delete(key):opened.add(key);render()}
+ if(action==='preview'){alert('附件预览演示：'+btn.dataset.attName+'。原型未保存文件本体，实际预览需接入文件服务。')}
+ else if(action==='history'){opened.has(key)?opened.delete(key):opened.add(key);render()}
  else if(action==='replace'||action==='append')open(key,action,btn.dataset.attTarget||'');
 });
 window.addEventListener('copyright-attachments-updated',render);
