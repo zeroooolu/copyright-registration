@@ -41,6 +41,22 @@ function render(key){const c=configs[key]||configs.pending_accept,actionBody=doc
 
 const S=window.CopyrightSupplement;
 const esc=S.escapeHTML;
+function renderCurrentMaterials(){
+  const items=[
+    {key:'authorization',label:'授权委托协议',fallback:'著作权登记授权委托协议.pdf'},
+    {key:'audio',label:'作品音频',fallback:title+'.wav'},
+    {key:'identity',label:'主体证明',fallback:'营业执照.jpg'},
+    {key:'extra_authorization',label:'补充授权书',fallback:''},
+    {key:'other',label:'其他证明材料',fallback:''},
+    {key:'agent_authorization',label:'代理委托书',fallback:''}
+  ];
+  const rows=items.map(m=>{
+    const files=S.getAttachment(appNo,m.key,m.fallback).entries;
+    if(!files.length)return '';
+    return '<div class="kv"><span>'+esc(m.label)+'</span><strong>'+files.map(x=>esc(x.name)).join('、')+'</strong></div>';
+  }).join('');
+  document.getElementById('materials').innerHTML=rows+'<div class="kv"><span>作品信息</span><strong>已提交</strong></div>';
+}
 const supplementPanel=document.getElementById('supplementPanel');
 function showSupplement(){
   const req=S.active(appNo),last=S.latest(appNo);
@@ -102,6 +118,6 @@ function showSupplement(){
   };
 }
 
-document.getElementById('statusSelect').addEventListener('change',event=>{const q=new URLSearchParams(location.search);q.set('status',event.target.value);history.replaceState(null,'','?'+q.toString());render(event.target.value);showSupplement()});document.getElementById('secondaryBtn').onclick=()=>location.href='index.html';render(S.active(appNo)?.triggerStatus||status);showSupplement();window.addEventListener('storage',showSupplement);window.addEventListener('copyright-supplement-updated',showSupplement);
+document.getElementById('statusSelect').addEventListener('change',event=>{const q=new URLSearchParams(location.search);q.set('status',event.target.value);history.replaceState(null,'','?'+q.toString());render(event.target.value);showSupplement()});document.getElementById('secondaryBtn').onclick=()=>location.href='index.html';render(S.active(appNo)?.triggerStatus||status);showSupplement();window.addEventListener('storage',()=>{showSupplement();renderCurrentMaterials()});window.addEventListener('copyright-supplement-updated',()=>{showSupplement();renderCurrentMaterials()});window.addEventListener('copyright-attachments-updated',renderCurrentMaterials);renderCurrentMaterials();
 })();
 </script></body></html>
