@@ -97,7 +97,8 @@
           if(!entry||entry.key==='other')throw new Error('请选择有效的附件类型');
           validateAttachmentFile(entry.key,entry.file);
           const material=MATERIALS.find(m=>m.key===entry.key),file=entry.file;
-          const current=getAttachment(appNo,entry.key,material.file||'');
+          const fallback=entry.key==='audio'&&r.workTitle?r.workTitle+'.wav':material.file||'';
+          const current=getAttachment(appNo,entry.key,fallback);
           const meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
           return {id:'SELF'+timestamp+i.toString(36),key:entry.key,name:material.name,original:current.entries.map(x=>x.name).join('、'),
             mode:'append',reason:'other',requirement:'',replacement:meta,approved:false,versions:[meta]};
