@@ -56,6 +56,9 @@
       // Mock only: real integration must call the authenticated server-side API.
       if(!a.regNumberDemo){result.push({id,code:'not_ready',message:'模拟接口暂未返回登记号'});return}
       const number=normalizeReg(a.regNumberDemo);
+      if(previous[id]?.source==='manual'){
+        result.push({id,code:'manual_kept',message:'已有人工核验登记号，未覆盖'});return;
+      }
       const duplicate=Object.entries(previous).find(([k,v])=>k!==id&&normalizeReg(v.number)===number);
       if(duplicate){result.push({id,code:'duplicate',message:'登记号已属于 '+duplicate[0]});return}
       previous[id]={number,workId:a.workId,source:'mock_api',syncedAt:now()};
