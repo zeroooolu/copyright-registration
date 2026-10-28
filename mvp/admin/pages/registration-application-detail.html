@@ -88,6 +88,9 @@
   function open(preselect){
     if(S.active(id))return alert('请先处理当前未完成的补充任务');
     opts.querySelectorAll('.supp-option').forEach(el=>{
+      const m=S.MATERIALS.find(x=>x.key===el.dataset.material);
+      const current=S.getAttachment(id,m.key,m.key==='audio'?d[0]+'.wav':m.file||'');
+      el.querySelector('.supp-option-title small').textContent=current.entries.map(x=>x.name).join('、')||'未上传';
       const selected=preselect===el.dataset.material;
       el.querySelector('.supp-pick').checked=selected;el.classList.toggle('checked',selected);
       el.querySelector('.supp-requirement').value=selected?'请重新上传清晰、完整且符合登记要求的文件。':'';
