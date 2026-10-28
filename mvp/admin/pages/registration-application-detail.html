@@ -8,7 +8,7 @@
 <body data-admin-page="applications" data-page-title="申请详情" data-page-parent="登记申请">
 <div id="admin-shell"></div>
 <template id="page-content">
-  <div class="detail-head"><div class="detail-title"><h1 id="title">晴天</h1><div class="detail-meta"><span>申请编号 <b id="appNo">CR202609030001</b></span><span>登记 ID <b id="regId">—</b></span><span>提交时间 <b id="submittedAt">2026-09-03 16:20:18</b></span><span>来源 <b id="sourceText">用户自助</b></span></div></div><div class="detail-actions"><a class="ra-btn" href="registration-applications.html">返回列表</a><a class="ra-btn" id="previewFront" target="_blank" rel="noopener">预览用户端</a><button class="ra-btn primary" id="requestBtn">发起材料补充</button></div></div>
+  <div class="detail-head"><div class="detail-title"><h1 id="title">晴天</h1><div class="detail-meta"><span>申请编号 <b id="appNo">CR202609030001</b></span><span>官方 WorkID <b id="regId">—</b></span><span>提交时间 <b id="submittedAt">2026-09-03 16:20:18</b></span><span>来源 <b id="sourceText">用户自助</b></span></div></div><div class="detail-actions"><a class="ra-btn" href="registration-applications.html">返回列表</a><a class="ra-btn" id="previewFront" target="_blank" rel="noopener">预览用户端</a><button class="ra-btn primary" id="requestBtn">发起材料补充</button></div></div>
   <div class="detail-grid"><div>
     <section class="detail-card self-only"><div class="detail-card-head"><strong>提交与支付关系</strong><span>用户自助登记新增</span></div><div class="detail-body"><div class="info-grid"><div class="info-row"><span class="k">本次提交编号</span><span class="v"><a class="ra-link" href="registration-submission-detail.html?id=CRSUB202609030001">CRSUB202609030001</a></span></div><div class="info-row"><span class="k">支付订单</span><span class="v">CRPAY202609030001</span></div><div class="info-row"><span class="k">本次提交项目</span><span class="v">录音制品</span></div><div class="info-row"><span class="k">支付状态</span><span class="v"><span class="ra-tag green">已支付</span></span></div></div><div class="payment-summary" style="margin-top:12px"><div class="metric"><span>本次提交服务费</span><strong>¥39.00</strong></div><div class="metric"><span>实际支付</span><strong>¥39.00</strong></div></div><div class="hint" style="margin-top:12px">本次提交仅生成一条录音制品登记申请，通过统一收银台支付 ¥39.00。</div></div></section>
 
@@ -16,6 +16,19 @@
 
     <section class="detail-card"><div class="detail-card-head"><strong>著作权人信息</strong><span>权利主体</span></div><div class="detail-body"><div class="info-grid"><div class="info-row"><span class="k">著作权人类型</span><span class="v">企业法人</span></div><div class="info-row"><span class="k">著作权人名称</span><span class="v" id="ownerName">看见音乐（上海）有限公司</span></div><div class="info-row"><span class="k">联系人</span><span class="v">张三</span></div><div class="info-row"><span class="k">手机号</span><span class="v">138****8888</span></div><div class="info-row"><span class="k">邮箱</span><span class="v">copyright@example.com</span></div><div class="info-row"><span class="k">证件类型</span><span class="v">营业执照</span></div><div class="info-row"><span class="k">证件号码</span><span class="v">9131**********8X</span></div><div class="info-row"><span class="k">国家/区域</span><span class="v">中国</span></div><div class="info-row"><span class="k">所在城市</span><span class="v">上海市</span></div><div class="info-row"><span class="k">邮编</span><span class="v">200232</span></div><div class="info-row"><span class="k">详细地址</span><span class="v">龙腾大道2879号3楼</span></div><div class="info-row"><span class="k">署名方式</span><span class="v">本名</span></div><div class="info-row"><span class="k">证件附件</span><span class="v supp-file"><span class="file-link" data-preview="image">营业执照.jpg</span><button type="button" class="supp-flag" data-flag="identity">标记需补充</button></span></div><div class="info-row"><span class="k">原授权书</span><span class="v supp-file"><span class="file-link" data-preview="pdf">著作权登记授权委托协议.pdf</span><button type="button" class="supp-flag" data-flag="authorization">标记需补充</button></span></div><div class="info-row"><span class="k">补充授权书</span><span class="v supp-file">— <button type="button" class="supp-flag" data-flag="extra_authorization">要求补传</button></span></div></div></div></section>
 
+    <section class="detail-card"><div class="detail-card-head"><strong>官方登记号与证书</strong><span>登记号同步 · 证书交付</span></div><div class="detail-body">
+  <div class="info-grid">
+    <div class="info-row"><span class="k">官方 WorkID</span><span class="v" id="certificateWorkId">—</span></div>
+    <div class="info-row"><span class="k">作品登记号</span><span class="v" id="certificateRegNo">未获取</span></div>
+    <div class="info-row"><span class="k">登记号来源</span><span class="v" id="certificateSyncSource">尚未同步</span></div>
+    <div class="info-row"><span class="k">证书交付状态</span><span class="v" id="certificateDelivery">未上传</span></div>
+  </div>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:14px">
+    <button type="button" class="ra-btn" id="detailSyncReg">获取 / 刷新登记号</button>
+    <a class="ra-btn" href="certificate-upload.html">进入证书上传</a>
+    <button type="button" class="ra-btn" id="detailViewCert" hidden>查看已发放 PNG</button>
+  </div><p id="certificateHint" class="supp-toolbar-note" style="margin-top:12px">正式接入后通过服务端调用官方 GetWorksRegNumber 接口。</p>
+</div></section>
     <section class="detail-card"><div class="detail-card-head"><strong>材料补充记录</strong><span>平台审核 / 官方补正</span></div><div class="detail-body" id="suppRecords"><div class="supp-empty">暂无补充任务</div></div></section>
     <section class="detail-card"><div class="detail-card-head"><strong>申请人信息</strong><span>代理登记申请主体</span></div><div class="detail-body"><div class="info-grid"><div class="info-row"><span class="k">申请人名称</span><span class="v" id="applicantName">看见音乐（上海）有限公司</span></div><div class="info-row"><span class="k">国家/区域</span><span class="v">中国</span></div><div class="info-row"><span class="k">通讯地址</span><span class="v">龙腾大道2879号3楼</span></div><div class="info-row"><span class="k">邮政编码</span><span class="v">200232</span></div><div class="info-row"><span class="k">联系人</span><span class="v">张三</span></div><div class="info-row"><span class="k">手机号</span><span class="v">138****8888</span></div><div class="info-row"><span class="k">座机号码</span><span class="v">021-63570107</span></div><div class="info-row"><span class="k">传真号码</span><span class="v">021-63570107</span></div><div class="info-row"><span class="k">邮箱</span><span class="v">copyright@example.com</span></div><div class="info-row"><span class="k">委托事项</span><span class="v">代理著作人提交权利登记</span></div></div></div></section>
 
@@ -40,12 +53,13 @@
   <div class="supp-drawer-foot"><button type="button" class="ra-btn" id="suppCancel">取消</button><button type="button" class="ra-btn primary" id="suppCreate">确认发起材料补充</button></div>
 </div></div>
 <script src="../assets/js/admin-shell.js"></script>
-<script src="../../supplement-store.js"></script>
+<script src="../../supplement-store.js"></script><script src="../../certificate-store.js"></script>
 <script>
 (()=>{
-  const S=window.CopyrightSupplement, e=S.escapeHTML;
+  const S=window.CopyrightSupplement, e=S.escapeHTML, C=window.CopyrightCertificate;
   const q=new URLSearchParams(location.search),id=q.get('id')||'CR202609030001';
   const examples={
+    CR202510150001:['关上世界的窗','欢唱网络科技（上海）有限公司','欢唱','已发证','issued','batch','2025-12-15 10:30:00','2145541433589761'],
     CR202608250001:['青花瓷','看见音乐（上海）有限公司','看见音乐','待初审','pending_first_review','self','2026-08-25 14:32:00','—'],
     CR202609030001:['晴天','看见音乐（上海）有限公司','看见音乐','待初审','pending_first_review','self','2026-09-03 16:20:18','—'],
     CR202609030002:['夜曲','星海音乐工作室','看见音乐','待受理','pending_accept','self','2026-09-03 17:05:42','—'],
@@ -73,6 +87,34 @@
   document.querySelectorAll('.legacy-only').forEach(n=>n.hidden=self);
   if(!self){document.querySelectorAll('.self-only').forEach(n=>n.style.display='none');document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='');}
   else document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='none');
+  function renderCertificate(){
+    const r=C.getReg(id),certificate=C.getDelivered(id),workId=C.workIdFor(id)||d[7];
+    $('certificateWorkId').textContent=workId||'未取得';
+    $('certificateRegNo').textContent=r?.number||'未获取';
+    $('certificateSyncSource').textContent=r?.source==='mock_api'?'模拟官方接口返回（非真实查询）':r?.source==='manual'?'人工绑定':'未同步';
+    $('certificateDelivery').textContent=certificate?'已发放 · '+certificate.deliveredAt:
+      C.all().some(x=>x.appId===id&&x.delivery!=='delivered')?'待确认发放':'未上传';
+    $('detailViewCert').hidden=!certificate;
+    $('detailSyncReg').disabled=!C.workIdFor(id);
+    $('certificateHint').textContent=certificate?'登记证书已交付，可通过用户前台查看和下载。':
+      !C.workIdFor(id)?'当前申请尚无官方 WorkID，不能调用作品登记号接口。':
+      '本页为交互原型：同步操作使用演示接口结果。真实接口需服务端携带 access_token 调用。';
+    if(certificate){$('statusName').textContent='已发证'}
+  }
+  $('detailSyncReg').onclick=()=>{
+    const result=C.sync([id]);C.rematchAll();renderCertificate();
+    alert(result[0]?.code==='success'?'模拟同步成功：'+result[0].number:result[0]?.message||'同步失败');
+  };
+  $('detailViewCert').onclick=async()=>{
+    const cert=C.getDelivered(id);if(!cert)return;
+    const blob=await C.getBlob(cert.id);
+    if(!blob)return alert('当前浏览器未找到 PNG 文件，请在原上传浏览器查看。');
+    const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  };
+  window.addEventListener('copyright-certificate-updated',renderCertificate);
+  window.addEventListener('storage',renderCertificate);
+  renderCertificate();
   const preview=new URL('../../frontend/star-release/registration-detail.html',location.href);
   preview.search=new URLSearchParams({status:d[4],app_no:id,title:d[0],registration_name:d[0],artist:id==='CR202608250001'||id==='CR202609030001'?'周杰伦':d[1],order_total:'39',paid_amount:'39'}).toString();
   $('previewFront').href=preview.toString();
