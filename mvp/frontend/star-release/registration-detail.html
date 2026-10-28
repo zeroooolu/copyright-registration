@@ -64,7 +64,7 @@ function showSupplement(){
   supplementPanel.hidden=false;
   document.getElementById('statusSelect').disabled=!!req;
   const record=req||last;
-  const source=S.sourceText(record.source),deadline=record.deadline?' · 截止日期：'+esc(record.deadline):'';
+  const source=S.sourceText(record.source);
   const need=req?.status==='needs_upload',reviewing=req?.status==='reviewing',pendingOfficial=req?.status==='awaiting_official';
   const stateLabel=need?'待补充材料':reviewing?'材料审核中':pendingOfficial?'待提交官方':'补充材料已完成';
   if(req){
@@ -77,12 +77,11 @@ function showSupplement(){
     const notice=document.getElementById('notice');
     notice.className='notice'+(need?' warning':'');
     document.getElementById('noticeText').textContent=source+'：'+explain;
-    document.getElementById('deadlineTitle').textContent=record.deadline?'补充截止时间：'+record.deadline:'补充材料处理中';
+    document.getElementById('deadlineTitle').textContent='补充材料处理中';
     document.getElementById('deadlineText').textContent=record.source==='official'?'用户上传后仍需平台复核和确认转交官方；在线提交不等于已提交登记机构。':'材料经平台复核后恢复原办理阶段。';
   }
-  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+source+' · '+record.items.length+' 项附件需要处理'+deadline+'</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
-  const note=record.officialNote?'<div class="supp-front-note">'+esc(record.officialNote)+'</div>':'';
-  const official=record.officialFile?'<div class="supp-front-note">官方补正通知：'+esc(record.officialFile.name)+'（原型仅记录文件名）</div>':'';
+  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+source+' · '+record.items.length+' 项附件需要处理</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
+
   const items=record.items.map(item=>{
     const open=need&&!item.approved,approved=item.approved,finalName=item.replacement?.name;
     let upload='';
@@ -95,7 +94,7 @@ function showSupplement(){
   }).join('');
   const footer=need?'<div class="supp-front-actions"><p id="suppFrontHint">请完成全部必补项后提交。</p><button type="button" id="suppFrontSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>':reviewing?'<div class="supp-front-note">已提交至看见音乐平台，工作人员复核后会更新状态。无需重复上传。</div>':pendingOfficial?'<div class="supp-front-note">材料已通过复核，工作人员将继续办理官方补正。用户无需操作。</div>':'<div class="supp-front-note">本次补充流程已完成，原登记申请继续办理。</div>';
   const events='<div class="supp-front-activity">处理记录：'+record.events.map(evt=>esc(evt.at)+' · '+esc(evt.label)).join('　 /　 ')+'</div>';
-  supplementPanel.innerHTML=intro+'<div class="supp-front-body">'+note+official+items+footer+events+'<div class="supp-front-activity">原型说明：上传操作仅记录文件名称和版本，不会把实际文件传到服务端。</div></div>';
+  supplementPanel.innerHTML=intro+'<div class="supp-front-body">'+items+footer+events+'</div>';
   if(!need)return;
   const inputs=[...supplementPanel.querySelectorAll('[data-supp-file]')];
   const hint=document.getElementById('suppFrontHint'),button=document.getElementById('suppFrontSubmit');
