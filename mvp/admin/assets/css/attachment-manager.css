@@ -1,0 +1,36 @@
+/* MVP backstage: inline application attachment management */
+.att-file-field{display:block!important;min-width:0}
+.att-file-stack{display:flex;flex-direction:column;gap:6px;min-width:0;width:100%}
+.att-entry{display:flex;align-items:flex-start;justify-content:space-between;gap:9px;padding:7px 8px;border:1px solid #e8ecf2;border-radius:5px;background:#fbfcff;min-width:0}
+.att-entry-main{display:flex;gap:6px;align-items:flex-start;min-width:0}
+.att-entry-main svg{flex:none;color:#7282a0;margin-top:2px}
+.att-entry-copy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.att-entry-name{font-size:12px;color:#3863af;overflow-wrap:anywhere;line-height:1.5}
+.att-entry-sub{font-size:10px;color:#97a3b0;line-height:1.5}
+.att-entry-actions{flex:none;display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.att-small-action{font:inherit;font-size:11px!important;color:#3163bf!important;background:transparent!important;border:0!important;cursor:pointer;padding:3px!important;white-space:nowrap}
+.att-small-action:disabled{color:#a3acb9!important;cursor:not-allowed}
+.att-empty{color:#9ca7b4;font-size:12px;padding:6px 0}
+.att-field-bottom{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:3px}
+.att-upload-btn{border:1px solid #c7d5f6;background:#f3f6ff;color:#365cb2;font-size:11px;padding:5px 9px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.att-upload-btn:disabled{opacity:.55;cursor:not-allowed}
+.att-history-btn{border:0;background:transparent;color:#7a8ba6;font-size:11px;cursor:pointer;padding:4px}
+.att-history{margin-top:5px;border-top:1px solid #e8ecf2;padding-top:8px;font-size:11px;color:#7e8997;line-height:1.8}
+.att-history-item{padding:5px 0;border-bottom:1px dashed #e8ecf2;overflow-wrap:anywhere}
+.att-history-item:last-child{border:0}
+.att-blocked{color:#b3833e;font-size:11px;line-height:1.5}
+.att-mini-muted{color:#98a4b3;font-size:10px}
+.att-dialog-overlay{display:none;position:fixed;inset:0;background:rgba(26,35,57,.48);z-index:310;align-items:center;justify-content:center;padding:20px}
+.att-dialog-overlay.open{display:flex}
+.att-dialog{width:min(500px,95vw);max-height:90vh;overflow:auto;border-radius:10px;background:#fff;box-shadow:0 20px 70px rgba(0,0,0,.2);color:#3d4a5e}
+.att-dialog-header{padding:20px 23px 16px;border-bottom:1px solid #e8edf3;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.att-dialog-header h2{font-size:17px;font-weight:600;margin:0}.att-dialog-header p{font-size:12px;color:#8995a5;margin:7px 0 0}
+.att-dialog-body{padding:20px 23px}
+.att-dialog-label{font-size:12px;color:#54657b;display:block;margin-bottom:8px;font-weight:600}
+.att-dialog-current{font-size:12px;color:#687789;background:#f7f9fc;padding:11px;border-radius:5px;margin-bottom:16px;overflow-wrap:anywhere}
+.att-dialog-input,.att-dialog-textarea{width:100%;box-sizing:border-box;border-radius:5px;border:1px solid #ced7e3;background:#fff;color:#455265;padding:10px;font:inherit;font-size:12px}
+.att-dialog-textarea{height:75px;resize:vertical}
+.att-dialog-help{font-size:11px;color:#8795a6;margin:7px 0 17px;line-height:1.6}
+.att-dialog-error{font-size:12px;color:#bd4c4c;margin-top:9px;min-height:16px}
+.att-dialog-footer{border-top:1px solid #e8edf3;display:flex;justify-content:flex-end;gap:9px;padding:14px 23px}
+@media(max-width:1250px){.att-entry{flex-direction:column}.att-entry-actions{align-self:flex-end}}
