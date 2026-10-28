@@ -130,6 +130,7 @@ async function renderIssuedCertificate(){
   // An actual delivered certificate always wins over prototype status selector.
   if(!S.active(appNo)){
     render('issued');
+    document.getElementById('statusSelect').disabled=true;
     document.getElementById('sideDesc').textContent='登记已完成，作品登记证书现已发放，可在下方查看并下载 PNG 文件。';
     document.getElementById('statusDesc').textContent='登记证书已发放，可以查看和下载。';
     document.getElementById('notice').className='notice success';
