@@ -34,23 +34,47 @@
   function latest(appNo){return list(appNo)[0]||null}
   function active(appNo){return list(appNo).find(x=>x.status!=='completed')||null}
   function event(label,detail){return {at:now(),label,detail:detail||''}}
+  const attachmentId=item=>item.id||item.key;
+  const FILE_LIMIT=20*1024*1024;
+  const EXTENSIONS={
+    audio:/\.(wav|mp3|flac|m4a)$/i,
+    identity:/\.(pdf|jpg|jpeg|png)$/i,
+    authorization:/\.(pdf|jpg|jpeg|png)$/i,
+    extra_authorization:/\.(pdf|jpg|jpeg|png)$/i,
+    agent_authorization:/\.(pdf|jpg|jpeg|png)$/i,
+    other:/\.(pdf|jpg|jpeg|png|doc|docx)$/i
+  };
+  function validateAttachmentFile(key,file){
+    if(!MATERIALS.some(m=>m.key===key))throw new Error('未知的附件类型');
+    if(!file||!file.name)throw new Error('请选择需要上传的文件');
+    if(Number(file.size||0)>FILE_LIMIT)throw new Error('单个文件不能超过 20 MB');
+    if(!EXTENSIONS[key].test(file.name))throw new Error('文件格式不符合「'+MATERIALS.find(m=>m.key===key).name+'」的要求');
+    return true;
+  }
   function create(payload){
     if(!payload||!payload.appNo)throw new Error('缺少登记申请编号');
     if(active(payload.appNo))throw new Error('当前申请存在未完成的补充任务，请先处理后再发起');
-    if(!Array.isArray(payload.items)||!payload.items.length)throw new Error('请至少选择一项附件');
-    const items=payload.items.map(x=>{
+    const description=String(payload.description||'').trim();
+    if(!description)throw new Error('请填写补证说明');
+    if(description.length>2000)throw new Error('补证说明不超过 2000 字');
+    if(!Array.isArray(payload.items))throw new Error('补充附件列表格式错误');
+    const items=payload.items.map((x,i)=>{
       const base=MATERIALS.find(m=>m.key===x.key);
-      if(!base)throw new Error('不支持的附件类型');
-      if(!String(x.requirement||'').trim())throw new Error(base.name+'需要填写具体补充要求');
-      return {key:base.key,name:base.name,original:x.original||base.file||'',mode:x.mode||'replace',reason:x.reason||'other',requirement:String(x.requirement).trim(),replacement:null,approved:false,versions:[]};
+      if(!base||base.key==='other')throw new Error('不支持的附件类型');
+      const original=x.original||base.file||'';
+      const mode=x.mode==='append'||!original?'append':'replace';
+      return {id:'I'+Date.now().toString(36)+i.toString(36),key:base.key,name:base.name,
+        original,mode,reason:x.reason||'other',requirement:String(x.requirement||'').trim(),
+        replacement:null,approved:false,versions:[]};
     });
     const record={
-      id:'SUP'+Date.now().toString(36).toUpperCase(),
-      appNo:String(payload.appNo),source:payload.source==='official'?'official':'platform',
+      id:'SUP'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase(),
+      appNo:String(payload.appNo),workTitle:String(payload.workTitle||''),
+      source:payload.source==='official'?'official':'platform',
+      description,selectionMode:items.length?'specified':'self',
       triggerStatus:payload.triggerStatus||'pending_accept',
       status:'needs_upload',createdAtMs:Date.now(),createdAt:now(),
-      operator:payload.operator||'运营人员',officialNote:payload.officialNote||'',
-      officialFile:payload.officialFile||null,deadline:payload.deadline||'',
+      operator:payload.operator||'运营人员',
       items,events:[event('发起材料补充',payload.source==='official'?'官方补正':'平台审核退回')]
     };
     const records=all();records.push(record);save(records);return clone(record);
@@ -60,58 +84,79 @@
     if(idx<0)throw new Error('当前没有待处理的补充任务');
     const record=records[idx];fn(record);save(records);return clone(record);
   }
-  function submit(appNo,files){
+  function submit(appNo,files,freeChoices){
     return change(appNo,r=>{
       if(r.status!=='needs_upload')throw new Error('当前状态不允许重复提交');
-      const outstanding=r.items.filter(x=>!x.approved);
-      if(!outstanding.length)throw new Error('没有需要补充的附件');
-      for(const item of outstanding){
-        const file=files?.[item.key];
-        if(!file||!file.name)throw new Error('请上传：'+item.name);
-        if(file.size>20*1024*1024)throw new Error(item.name+'超过演示文件大小限制 20 MB');
-        const extensions={
-          audio:/\.(wav|mp3|flac|m4a)$/i,
-          identity:/\.(pdf|jpg|jpeg|png)$/i,
-          authorization:/\.(pdf|jpg|jpeg|png)$/i,
-          extra_authorization:/\.(pdf|jpg|jpeg|png)$/i,
-          agent_authorization:/\.(pdf|jpg|jpeg|png)$/i,
-          other:/\.(pdf|jpg|jpeg|png|doc|docx)$/i
-        };
-        if(!extensions[item.key].test(file.name))throw new Error(item.name+'文件格式不符合要求，请重新选择');
+      // If the operator did not specify material items, the customer classifies each uploaded file.
+      if(!r.items.length){
+        if(!Array.isArray(freeChoices)||!freeChoices.length)throw new Error('请至少上传一份补充附件并选择类型');
+        if(freeChoices.length>20)throw new Error('单次最多补充 20 份附件');
+        const timestamp=Date.now().toString(36);
+        const prepared=freeChoices.map((entry,i)=>{
+          if(!entry||entry.key==='other')throw new Error('请选择有效的附件类型');
+          validateAttachmentFile(entry.key,entry.file);
+          const material=MATERIALS.find(m=>m.key===entry.key),file=entry.file;
+          const current=getAttachment(appNo,entry.key,material.file||'');
+          const meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
+          return {id:'SELF'+timestamp+i.toString(36),key:entry.key,name:material.name,original:current.entries.map(x=>x.name).join('、'),
+            mode:'append',reason:'other',requirement:'',replacement:meta,approved:false,versions:[meta]};
+        });
+        r.items=prepared;
+        r.selectionMode='self';
+      }else{
+        const outstanding=r.items.filter(x=>!x.approved);
+        if(!outstanding.length)throw new Error('没有需要补充的附件');
+        const uploadList=outstanding.map(item=>{
+          const file=files?.[attachmentId(item)]||files?.[item.key];
+          validateAttachmentFile(item.key,file);
+          return {item,file};
+        });
+        uploadList.forEach(({item,file})=>{
+          const meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
+          item.versions.push(meta);item.replacement=meta;
+        });
       }
-      outstanding.forEach(item=>{
-        const file=files[item.key],meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
-        item.versions.push(meta);item.replacement=meta;
-      });
-      r.status='reviewing';r.submittedAt=now();r.events.unshift(event('用户提交补充材料','待运营复核'));
+      r.status='reviewing';r.submittedAt=now();
+      r.events.unshift(event('用户提交补充材料',r.items.length+' 项文件待运营复核'));
     });
   }
-  function review(appNo,action,keys=[],comment=''){
-    const updated=change(appNo,r=>{
-      if(r.status!=='reviewing')throw new Error('请等待用户提交补充材料');
-      if(action==='approve'){
+  function review(appNo,action,ids=[],comment=''){
+    const activeRequest=active(appNo);
+    if(!activeRequest||activeRequest.status!=='reviewing')throw new Error('请等待用户提交补充材料');
+    if(action==='approve'){
+      // Validate before persisting the review transition; this prevents an invalid
+      // empty-attachment "replace" from leaving the request in a completed state.
+      const approved=activeRequest.items.filter(i=>i.replacement);
+      const promotions=approved.map(item=>{
+        validateAttachmentFile(item.key,item.replacement);
+        const base=MATERIALS.find(m=>m.key===item.key);
+        const current=getAttachment(appNo,item.key,item.original||base.file||'');
+        const mode=item.mode==='replace'&&current.entries.length?'replace':'append';
+        return {appNo,key:item.key,mode,file:item.replacement,
+          fallbackName:item.original||base.file||'',operator:'用户补充 · 运营复核通过',
+          note:'来自补充任务 '+activeRequest.id,source:'supplement',bypassTask:true};
+      });
+      promotions.forEach(commitAttachment);
+      return change(appNo,r=>{
         r.items.forEach(i=>i.approved=true);
         r.status=r.source==='official'?'awaiting_official':'completed';
-        r.reviewedAt=now();r.events.unshift(event('材料复核通过',comment||'附件审核通过'));
-      }else if(action==='reject'){
-        if(!keys.length)throw new Error('请勾选仍需重新补充的附件');
-        r.items.forEach(i=>i.approved=!keys.includes(i.key));
-        r.items.filter(i=>!i.approved).forEach(i=>{if(comment)i.requirement=comment});
-        r.status='needs_upload';r.events.unshift(event('再次要求补充',comment||'附件仍不符合要求'));
-      }else throw new Error('无效复核操作');
-    });
-    if(action==='approve'){
-      // Promote approved user submissions into the application's current file roster.
-      // Supplement-task versions remain separate as their own audit history.
-      updated.items.filter(i=>i.replacement).forEach(i=>{
-        commitAttachment({
-          appNo,key:i.key,mode:i.mode,file:i.replacement,
-          fallbackName:i.original,operator:'用户补充 · 运营复核通过',
-          note:'来自补充任务 '+updated.id,source:'supplement',bypassTask:true
-        });
+        r.reviewedAt=now();
+        r.events.unshift(event('材料复核通过',comment||'附件审核通过'));
       });
     }
-    return updated;
+    if(action==='reject'){
+      if(!ids.length)throw new Error('请勾选仍需重新补充的附件');
+      if(!String(comment||'').trim())throw new Error('请填写再次补充要求');
+      const target=new Set(ids);
+      return change(appNo,r=>{
+        if(!r.items.some(i=>target.has(attachmentId(i))))throw new Error('未选择有效的附件');
+        r.items.forEach(i=>i.approved=!target.has(attachmentId(i)));
+        r.items.filter(i=>!i.approved).forEach(i=>i.requirement=comment.trim());
+        r.status='needs_upload';
+        r.events.unshift(event('再次要求补充',comment.trim()));
+      });
+    }
+    throw new Error('无效复核操作');
   }
   function markOfficial(appNo,receipt){
     return change(appNo,r=>{
@@ -123,25 +168,9 @@
   }
   /* Per-application current attachment roster and audit history (metadata-only prototype). */
   const FILE_KEY='copyright-registration:mvp:application-files:v1';
-  const MAX_BYTES=20*1024*1024;
-  const EXTENSIONS={
-    audio:/\.(wav|mp3|flac|m4a)$/i,
-    identity:/\.(pdf|jpg|jpeg|png)$/i,
-    authorization:/\.(pdf|jpg|jpeg|png)$/i,
-    extra_authorization:/\.(pdf|jpg|jpeg|png)$/i,
-    agent_authorization:/\.(pdf|jpg|jpeg|png)$/i,
-    other:/\.(pdf|jpg|jpeg|png|doc|docx)$/i
-  };
   function fileRecords(){
     try{const v=JSON.parse(localStorage.getItem(FILE_KEY)||'{}');return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
     catch(err){return {}}
-  }
-  function validateAttachmentFile(key,file){
-    if(!MATERIALS.some(m=>m.key===key))throw new Error('未知的附件类型');
-    if(!file||!file.name)throw new Error('请选择需要上传的文件');
-    if(Number(file.size||0)>MAX_BYTES)throw new Error('单个文件不能超过 20MB');
-    if(!EXTENSIONS[key].test(file.name))throw new Error('文件格式不符合当前附件要求');
-    return true;
   }
   const newEntry=(file,source,operator)=>({
     id:'F'+Math.random().toString(36).slice(2,10)+Date.now().toString(36),
@@ -192,5 +221,5 @@
   const statusText=status=>({needs_upload:'待用户补充',reviewing:'待后台复核',awaiting_official:'待提交官方',completed:'已完成'})[status]||status;
   const sourceText=source=>source==='official'?'官方补正':'平台审核退回';
   const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,create,submit,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile};
+  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,create,submit,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile,attachmentId};
 })(window);
