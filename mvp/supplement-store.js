@@ -68,6 +68,14 @@
         const file=files?.[item.key];
         if(!file||!file.name)throw new Error('请上传：'+item.name);
         if(file.size>20*1024*1024)throw new Error(item.name+'超过演示文件大小限制 20 MB');
+        const extensions={
+          audio:/\.(wav|mp3|flac|m4a)$/i,
+          identity:/\.(pdf|jpg|jpeg|png)$/i,
+          authorization:/\.(pdf|jpg|jpeg|png)$/i,
+          extra_authorization:/\.(pdf|jpg|jpeg|png)$/i,
+          other:/\.(pdf|jpg|jpeg|png|doc|docx)$/i
+        };
+        if(!extensions[item.key].test(file.name))throw new Error(item.name+'文件格式不符合要求，请重新选择');
       }
       outstanding.forEach(item=>{
         const file=files[item.key],meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
