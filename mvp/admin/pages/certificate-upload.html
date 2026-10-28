@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>证书上传｜著作权登记 MVP Admin</title>
+<link rel="stylesheet" href="../assets/css/admin-common.css">
+<link rel="stylesheet" href="../assets/css/registration-admin.css">
+<link rel="stylesheet" href="../assets/css/certificate.css">
+</head>
+<body data-admin-page="certificates" data-page-title="证书上传">
+<div id="admin-shell"></div>
+<template id="page-content">
+<div class="cert-page">
+  <header class="cert-header">
+    <div><h1>证书上传</h1><p>批量导入一网通办下载的 PNG 证书，识别作品登记号，匹配申请后确认发放。</p></div>
+    <div class="cert-inline"><span class="cert-label">MVP 演示</span><a class="cert-btn" href="registration-applications.html">查看登记申请</a></div>
+  </header>
+  <section class="cert-metrics">
+    <div class="cert-metric"><small>已上传证书</small><strong id="statTotal">0</strong></div>
+    <div class="cert-metric"><small>匹配成功 · 待发放</small><strong id="statMatched">0</strong></div>
+    <div class="cert-metric"><small>待人工处理</small><strong id="statExceptions">0</strong></div>
+    <div class="cert-metric"><small>已发放</small><strong id="statDelivered">0</strong></div>
+  </section>
+  <div class="cert-layout">
+    <section class="cert-panel">
+      <div class="cert-panel-head"><div><strong>批量上传 PNG 证书</strong><p>选择文件后尝试识别作品登记号，支持人工校对</p></div><span class="cert-label">最多 100 张/批</span></div>
+      <div class="cert-panel-body">
+        <div class="cert-drop" id="uploadDrop" tabindex="0" role="button" aria-label="点击选择或拖拽 PNG 文件上传">
+          <div class="cert-drop-icon">⇧</div><strong>拖拽 PNG 文件到这里，或点击选择</strong><small>单个文件不超过 20 MB · 仅支持 .png</small>
+        </div>
+        <input id="certFiles" type="file" accept=".png,image/png" multiple hidden>
+        <div class="cert-inline" style="margin-top:12px">
+          <button class="cert-btn primary" id="chooseFiles">选择 PNG 文件</button>
+          <button class="cert-btn" id="demoCert">生成并上传演示证书</button>
+        </div>
+        <div id="uploadProgress" class="cert-progress" hidden></div>
+        <div class="cert-upload-info">实际 PNG 尝试浏览器端 OCR，识别失败时可在右侧修正。演示证书使用预设登记号，不代表调用官方接口或 OCR 成功。</div>
+      </div>
+    </section>
+    <section class="cert-panel">
+      <div class="cert-panel-head"><div><strong>作品登记号同步</strong><p>根据官方 WorkID 获取 RegNumber</p></div><span class="cert-label">接口演示</span></div>
+      <div class="cert-panel-body">
+        <div class="cert-panel-half">
+          <div class="cert-cell"><label>调用方式</label><strong>GET</strong></div>
+          <div class="cert-cell"><label>关键参数</label><strong>WorkID</strong></div>
+          <div class="cert-cell full"><label>官方接口</label><strong>/Works/Index/GetWorksRegNumber</strong></div>
+        </div>
+        <div class="cert-tip">原型将接口返回模拟为预设测试数据，并保留未出号、未取得 WorkID 的异常结果。真实接口应由服务端携带 access_token 调用。</div>
+        <button class="cert-btn primary" id="syncAll" style="margin-top:13px;width:100%">批量同步作品登记号</button>
+        <div id="syncInfo" class="cert-sync-info">尚未执行模拟同步</div>
+        <div id="syncResults" class="cert-sync-list"></div>
+      </div>
+    </section>
+  </div>
+  <section class="cert-panel">
+    <div class="cert-panel-head"><div><strong>证书处理记录</strong><p>匹配到唯一登记申请并核验无异常后，才允许确认发放。</p></div>
+      <div class="cert-inline"><button class="cert-btn primary" id="bulkDeliver" disabled>确认批量发放（0）</button></div>
+    </div>
+    <div class="cert-toolbar">
+      <div class="cert-tabs" id="certTabs">
+        <button type="button" class="cert-tab active" data-tab="pending">待匹配 / 待发放</button>
+        <button type="button" class="cert-tab" data-tab="exceptions">异常待处理</button>
+        <button type="button" class="cert-tab" data-tab="delivered">已发放</button>
+      </div>
+      <input type="search" id="certSearch" placeholder="搜索登记号 / 作品 / 文件名">
+    </div>
+    <table class="cert-table">
+      <colgroup><col style="width:4%"><col style="width:22%"><col style="width:23%"><col style="width:23%"><col style="width:17%"><col style="width:11%"></colgroup>
+      <thead><tr><th><input id="certSelectAll" type="checkbox" aria-label="勾选全部可发放证书"></th><th>证书文件</th><th>识别作品登记号</th><th>匹配的登记申请</th><th>匹配 / 发放状态</th><th>操作</th></tr></thead>
+      <tbody id="certificateRows"><tr><td colspan="6" class="cert-empty">暂无证书，上传 PNG 开始处理</td></tr></tbody>
+    </table>
+    <div class="cert-foot"><span id="resultCount">共 0 条</span><span>证书文件仅保存在当前浏览器，用于原型演示</span></div>
+  </section>
+</div>
+</template>
+<div id="certOverlay" class="cert-overlay" aria-hidden="true">
+ <div class="cert-drawer" role="dialog" aria-modal="true" aria-labelledby="certDrawerTitle">
+  <div class="cert-drawer-head"><div><h2 id="certDrawerTitle">证书识别与关联</h2><small id="certDrawerSubtitle">核对作品登记号及匹配结果</small></div><button class="cert-btn" id="certClose">关闭</button></div>
+  <div class="cert-drawer-body">
+    <div id="certPreview" class="cert-preview"><span class="cert-placeholder">加载证书预览</span></div>
+    <div class="cert-form-grid">
+      <div class="full"><label>作品登记号 *</label><input class="cert-input" id="certReg" placeholder="例如：沪作登字-2025-S-03886487"></div>
+      <div><label>作品/制品名称（辅助核对）</label><input class="cert-input" id="certWork" placeholder="证书上的作品名称"></div>
+      <div><label>著作权人（辅助核对）</label><input class="cert-input" id="certOwner" placeholder="证书上的著作权人"></div>
+      <div class="full"><label>匹配状态</label><div id="certMatchInfo" class="cert-form-note">待识别</div></div>
+      <div class="full"><label>人工指定申请（仅用于异常记录）</label>
+        <select id="certAppSelect" class="cert-input"><option value="">选择登记申请</option></select></div>
+    </div>
+    <div class="cert-form-note" id="certDrawerHint">请核对证书原图、作品登记号与申请信息。如存在冲突，不应直接发放。</div>
+    <div class="cert-inline">
+      <button class="cert-small-btn" id="certOCR">重新 OCR 识别</button>
+      <button class="cert-small-btn" id="certManualBind">人工关联并写入登记号</button>
+      <button class="cert-small-btn" id="certOpenImage">在新标签查看原始 PNG</button>
+    </div>
+    <div id="certOCRResult" class="cert-sync-info"></div>
+  </div>
+  <div class="cert-drawer-actions">
+    <button class="cert-btn" id="certSave">保存识别信息</button>
+    <button class="cert-btn primary" id="certDeliver">确认发放</button>
+  </div>
+ </div>
+</div>
+<script src="../assets/js/admin-shell.js"></script>
+<script src="../../certificate-store.js"></script>
+<script src="../assets/js/certificate-page.js"></script>
+</body></html>
