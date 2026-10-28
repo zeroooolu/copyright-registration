@@ -1,0 +1,16 @@
+/* Issued copyright certificate delivery card – MVP */
+#certificatePanel[hidden]{display:none!important}
+.cert-user-head{padding:18px 20px;background:#f3fbf6;border-bottom:1px solid #d9ece1;display:flex;justify-content:space-between;align-items:start;gap:14px}
+.cert-user-head strong{font-size:15px;color:#267249}
+.cert-user-head p{font-size:12px;color:#6f8c7a;line-height:1.7;margin:6px 0 0}
+.cert-user-badge{white-space:nowrap;background:#e0f3e8;color:#298153;padding:5px 9px;border-radius:4px;font-size:11px}
+.cert-user-body{padding:18px 20px}
+.cert-user-main{display:grid;grid-template-columns:110px minmax(0,1fr);gap:17px;align-items:center}
+.cert-user-thumb{background:#f7f8fb;border:1px solid #e2e7ed;border-radius:6px;height:90px;display:grid;place-items:center;overflow:hidden}
+.cert-user-thumb img{width:100%;height:100%;object-fit:contain}
+.cert-user-info strong{font-size:13px;display:block;color:#3f4c59;margin-bottom:9px}
+.cert-user-info p{font-size:12px;color:#7e8c9b;line-height:1.7;margin:3px 0;overflow-wrap:anywhere}
+.cert-user-actions{display:flex;gap:8px;margin-top:15px}
+.cert-user-actions a,.cert-user-actions button{height:35px;padding:0 17px;font-size:12px;border:1px solid #2448ff;color:#2448ff;border-radius:4px;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.cert-user-actions .download{background:#2448ff;color:white}
+.cert-user-note{color:#98a3b0;font-size:11px;line-height:1.65;margin-top:12px}
