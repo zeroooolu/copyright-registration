@@ -118,8 +118,9 @@
     $('requestBtn').disabled=!!active||d[4]==='issued'||d[4]==='failed';
     $('requestBtn').title=active?'需先完成当前补充任务':'';
     flags.forEach(btn=>{btn.disabled=$('requestBtn').disabled;btn.textContent=active&&active.items.some(x=>x.key===btn.dataset.flag)?'补充任务中':'标记需补充'});
-    if(active){$('statusName').textContent=S.statusText(active.status);$('statusName').style.color='#c28214'}
-    else{$('statusName').textContent=d[3];$('statusName').style.color=''}
+    $('statusName').textContent=d[3];
+    const statusDesc=document.querySelector('.status-panel .status-desc');
+    statusDesc.textContent=active?'官方办理状态保持不变。当前材料补充任务：'+S.statusText(active.status)+'。':'当前申请材料按既有官方登记流程办理；历史材料补充任务可在左侧查看。';
     if(!records.length){root.innerHTML='<div class="supp-empty">暂无补充任务，可在上方发起材料补充，或点击附件旁的「标记需补充」。</div>';return}
     root.innerHTML=records.map(r=>{
       const badge=r.status==='completed'?'done':r.status==='needs_upload'?'warn':'';
