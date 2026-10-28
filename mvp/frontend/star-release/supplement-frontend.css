@@ -1,0 +1,24 @@
+/* MVP customer-facing material supplement task */
+#supplementPanel[hidden]{display:none!important}
+.supp-front-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;background:#fffbf2;border-bottom:1px solid #f3e3b9;padding:18px 20px}
+.supp-front-head strong{display:block;color:#71501b;font-size:15px}
+.supp-front-head p{margin:6px 0 0;color:#85765d;font-size:12px;line-height:1.7}
+.supp-front-tag{display:inline-flex;align-items:center;white-space:nowrap;padding:5px 8px;background:#ffedc5;color:#956316;border-radius:4px;font-size:11px}
+.supp-front-body{padding:16px 20px 20px}
+.supp-front-note{padding:12px;background:#f5f8ff;color:#69788f;font-size:12px;border-radius:5px;line-height:1.7;margin-bottom:12px;white-space:pre-wrap}
+.supp-front-item{border:1px solid #e2e7ed;border-radius:6px;padding:15px;margin-bottom:12px}
+.supp-front-item-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:9px}
+.supp-front-item-head strong{color:#343e4d;font-size:13px}
+.supp-front-item-badge{font-size:10px;padding:4px 7px;background:#fff4dc;color:#996b24;border-radius:3px}
+.supp-front-item-badge.done{background:#ebf7f0;color:#21774f}
+.supp-front-item p{margin:5px 0 9px;color:#657182;font-size:12px;line-height:1.7}
+.supp-front-fileline{color:#8a95a5;font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+.supp-front-upload{display:flex;flex-direction:column;gap:7px;margin-top:11px;border:1px dashed #b7c5dd;border-radius:5px;padding:13px;background:#f9fbff}
+.supp-front-upload input{max-width:100%;font-size:12px;color:#465f82}
+.supp-front-upload label{font-size:12px;color:#475771;font-weight:500}
+.supp-front-upload small{font-size:10px;color:#929daf}
+.supp-front-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:14px}
+.supp-front-actions p{margin:0;color:#909aa7;font-size:11px}
+.supp-front-submit{height:38px;border:1px solid #2448ff;background:#2448ff;color:#fff;font-size:12px;border-radius:4px;padding:0 18px;cursor:pointer}
+.supp-front-submit:disabled{background:#bec5d0;border-color:#bec5d0;cursor:not-allowed}
+.supp-front-activity{font-size:11px;color:#8c98a8;border-top:1px solid #e6eaef;padding-top:12px;margin-top:14px;line-height:1.9}
