@@ -44,6 +44,7 @@ const esc=S.escapeHTML;
 const supplementPanel=document.getElementById('supplementPanel');
 function showSupplement(){
   const req=S.active(appNo),last=S.latest(appNo);
+  if(!req){render(new URLSearchParams(location.search).get('status')||status);}
   if(!req&&!last){supplementPanel.hidden=true;document.getElementById('statusSelect').disabled=false;return}
   supplementPanel.hidden=false;
   document.getElementById('statusSelect').disabled=!!req;
