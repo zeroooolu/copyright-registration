@@ -72,7 +72,7 @@
         link.textContent=link.dataset.baseAction;
       }else{
         status.innerHTML='<i class="status-dot"></i>'+E(view.listLabel);
-        status.className=['needs_upload','awaiting_notice'].includes(view.kind)?'status action':
+        status.className=['needs_upload','self_correction'].includes(view.kind)?'status action':
           view.kind==='delivered'?'status done':'status processing';
         link.textContent=view.action;
       }
