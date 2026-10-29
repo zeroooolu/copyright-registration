@@ -25,7 +25,7 @@
 <section class="card"><div class="card-head"><strong>状态记录</strong><span>当前申请</span></div><div class="card-body"><div class="timeline" id="eventTimeline"></div></div></section>
 </div><aside>
 
-<section class="card action-card"><div class="action-status"><small>当前状态</small><strong id="sideStatus">待受理</strong><p id="sideDesc"></p></div><div class="action-body" id="actionBody"><div class="deadline"><span>官方办理时限</span><strong id="deadlineTitle"></strong><p id="deadlineText"></p></div><button class="secondary" id="secondaryBtn" type="button">返回我的登记</button></div></section>
+<section class="card action-card"><div class="action-status"><small>当前状态</small><strong id="sideStatus">待受理</strong><p id="sideDesc"></p></div><div class="action-body" id="actionBody"><div class="deadline"><span>办理与交付状态</span><strong id="deadlineTitle"></strong><p id="deadlineText"></p></div><button class="secondary" id="secondaryBtn" type="button">返回我的登记</button></div></section>
 </aside></div>
 </div></main><script src="star-release-shell.js"></script><script src="../../supplement-store.js"></script><script src="supplement-free-upload.js"></script><script src="../../certificate-store.js"></script><script src="registration-status.js"></script><script>
 (()=>{
@@ -33,7 +33,7 @@ const p=new URLSearchParams(location.search),status=p.get('status')||'pending_ac
 const money=n=>'¥'+Number(n).toFixed(2);
 document.getElementById('title').textContent=registrationName;document.getElementById('meta').textContent='作品名称：'+title+' · '+artist+' · '+album;document.getElementById('cover').textContent=cover;document.getElementById('typeChip').textContent='录音制品';document.getElementById('workName').textContent=title;document.getElementById('registrationName').textContent=registrationName;document.getElementById('registrationType').textContent='录音制品';document.getElementById('appNo').textContent=appNo;document.getElementById('appNoHead').textContent='申请编号：'+appNo;document.getElementById('submissionNo').textContent=submissionNo;document.getElementById('orderNoHead').textContent='支付订单：'+orderNo;document.getElementById('orderTotal').textContent=money(orderTotal);document.getElementById('paid').textContent=money(paid);
 document.getElementById('materials').innerHTML='<div class="kv"><span>授权委托协议</span><strong class="link">查看已签协议</strong></div><div class="kv"><span>作品音频</span><strong class="link">'+title+'.wav</strong></div><div class="kv"><span>主体证明</span><strong class="link">营业执照.jpg</strong></div><div class="kv"><span>作品信息</span><strong>已提交</strong></div>';
-const configs={pending_accept:{name:'待受理',desc:'申请已提交，正在等待登记机构受理。',tone:'normal',official:0,side:'材料已经提交，等待登记机构正式受理。'},pending_supplement:{name:'待补证',desc:'登记机构要求补充或修正当前申请材料。',tone:'warning',official:1,supplement:true,side:'登记机构要求补充材料，请在下方查看本次补正要求并在线上传。'},pending_registration:{name:'待登记',desc:'申请已受理，正在进入登记办理。',tone:'normal',official:2,accepted:true,side:'当前申请已受理，正在进行登记处理。'},pending_first_review:{name:'待初审',desc:'当前申请材料正在进行初审。',tone:'normal',official:3,accepted:true,side:'当前申请正在初审，无需你额外操作。'},pending_re_review:{name:'待复审',desc:'初审已完成，当前申请正在进行复审。',tone:'normal',official:4,accepted:true,side:'当前申请已进入复审阶段，无需你额外操作。'},pending_certificate:{name:'待制证',desc:'当前申请审核已通过，正在制作登记证书。',tone:'normal',official:5,accepted:true,side:'当前申请审核已完成，正在生成登记证书。'},issued:{name:'已发证',desc:'当前登记申请已完成，证书已签发。',tone:'success',official:6,accepted:true,issued:true,side:'登记已完成，请联系 content@kanjian.com 获取证书'}};
+const configs={pending_accept:{name:'待受理',desc:'申请已提交，正在等待登记机构受理。',tone:'normal',official:0,side:'材料已经提交，等待登记机构正式受理。'},pending_supplement:{name:'待补证',desc:'请根据最新补证说明补充材料。',tone:'warning',official:1,supplement:true,side:'补证说明将在登记详情中显示，发布后可在线补充材料。'},pending_registration:{name:'待登记',desc:'申请已受理，正在进入登记办理。',tone:'normal',official:2,accepted:true,side:'当前申请已受理，正在进行登记处理。'},pending_first_review:{name:'待初审',desc:'当前申请材料正在进行初审。',tone:'normal',official:3,accepted:true,side:'当前申请正在初审，无需你额外操作。'},pending_re_review:{name:'待复审',desc:'初审已完成，当前申请正在进行复审。',tone:'normal',official:4,accepted:true,side:'当前申请已进入复审阶段，无需你额外操作。'},pending_certificate:{name:'待制证',desc:'当前申请审核已通过，正在制作登记证书。',tone:'normal',official:5,accepted:true,side:'当前申请审核已完成，正在生成登记证书。'},issued:{name:'已发证',desc:'官方登记已完成，电子证书由平台确认发放。',tone:'success',official:6,accepted:true,issued:true,side:'发放后可在登记详情直接下载电子证书。'}};
 const stages=['已提交','已受理','审核登记','制证','完成'],official=['待受理','待补证','待登记','待初审','待复审','待制证','已发证'];
 function stageIndex(c){if(c.name==='待受理')return 0;if(c.name==='待登记')return 1;if(['待补证','待初审','待复审'].includes(c.name))return 2;if(c.name==='待制证')return 3;return 4}
 function statusName(key){return (configs[key]||configs.pending_accept).name}
@@ -114,7 +114,7 @@ function render(key){
 
   const events=[['付款并提交','2026-08-26 14:38','本次提交完成，生成独立申请 '+appNo]];
   if(isSupplement){
-    view.task.events.forEach(e=>events.unshift([e.label,e.at,e.detail||view.task.description||'']));
+    view.task.events.slice().reverse().forEach(e=>events.unshift([e.label,e.at,e.detail||view.task.description||'']));
   }else if(view.kind==='awaiting_notice'){
     events.unshift(['待发布补证说明','—','工作人员尚未发布具体补证要求。']);
   }else if(view.kind==='delivered'){
@@ -230,9 +230,9 @@ async function renderIssuedCertificate(){
   if(certPreviewUrl){URL.revokeObjectURL(certPreviewUrl);certPreviewUrl=null}
   if(view.kind==='certificate_pending'){
     box.hidden=false;
-    box.innerHTML='<div class="cert-user-head"><div><strong>官方已发证 · 电子证书待发放</strong>'+
+    box.innerHTML='<div class="cert-user-head pending"><div><strong>官方已发证 · 电子证书待发放</strong>'+
       '<p>官方登记已完成，工作人员正在下载、上传并核对证书。发放后你可以直接在这里查看和下载。</p></div>'+
-      '<span class="cert-user-badge">待发放</span></div>'+
+      '<span class="cert-user-badge pending">待发放</span></div>'+
       '<div class="cert-user-body"><div class="cert-user-info"><strong>电子登记证书</strong>'+
       '<p>作品登记号：'+esc(reg?.number||'尚未同步')+'</p>'+
       '<p>发放状态：尚未上传或尚未确认发放</p></div></div>';
