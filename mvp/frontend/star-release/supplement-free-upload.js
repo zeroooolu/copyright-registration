@@ -3,15 +3,13 @@
   'use strict';
   function mount(container,store,appNo,onSubmitted,options={}){
     const E=store.escapeHTML,standalone=options.standalone===true;
-    const materials=store.MATERIALS.filter(m=>m.key!=='other');
+    const materials=store.MATERIALS.filter(m=>m.key!=='other'&&m.key!=='authorization');
     const allowed='.wav,.mp3,.flac,.m4a,.pdf,.jpg,.jpeg,.png';
     container.innerHTML='<div class="supp-free-head"><strong>'+(standalone?'自主补充材料':'上传补充附件')+'</strong>'+
       '<p>'+(standalone?'当前申请处于待补正阶段，尚无后台指定清单。可以根据已知补正要求上传证件、授权文件或音频，并为每份文件选择附件类型。':
         '根据上方补证说明选择文件，并为每份文件指定附件类型。可以一次添加多份附件。')+'</p></div>'+
       '<div id="suppFreeRows" class="supp-free-rows"></div>'+
       '<button type="button" class="supp-free-add" id="suppFreeAdd">＋ 添加一份附件</button>'+
-      (standalone?'<label class="supp-free-note-label" for="suppFreeNote">本次补充说明（选填）</label>'+
-      '<textarea class="supp-free-note" id="suppFreeNote" maxlength="500" placeholder="可以简单说明本次补充的材料和原因，方便后台核对"></textarea>':'')+
       '<div class="supp-front-actions"><p class="supp-free-hint" id="suppFreeHint">请上传至少一份附件并选择类型</p>'+
       '<button type="button" id="suppFreeSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>';
     const rows=container.querySelector('#suppFreeRows'),add=container.querySelector('#suppFreeAdd');
@@ -62,7 +60,7 @@
         if(standalone){
           store.submitCustomerCorrection({
             appNo,workTitle:options.workTitle||'',stage:'pending_supplement',
-            note:container.querySelector('#suppFreeNote')?.value||'',files:entries
+            files:entries
           });
         }else{
           store.submit(appNo,{},entries);
