@@ -25,7 +25,7 @@
 <section class="card"><div class="card-head"><strong>状态记录</strong><span>当前申请</span></div><div class="card-body"><div class="timeline" id="eventTimeline"></div></div></section>
 </div><aside>
 
-<section class="card action-card"><div class="action-status"><small>当前状态</small><strong id="sideStatus">待受理</strong><p id="sideDesc"></p></div><div class="action-body" id="actionBody"><div class="deadline"><span>办理与交付状态</span><strong id="deadlineTitle"></strong><p id="deadlineText"></p></div><button class="secondary" id="secondaryBtn" type="button">返回我的登记</button></div></section>
+<section class="card action-card"><div class="action-status"><small>当前状态</small><strong id="sideStatus">待受理</strong><p id="sideDesc"></p></div><div class="action-body" id="actionBody"><div class="deadline"><span>办理与交付状态</span><strong id="deadlineTitle"></strong><p id="deadlineText"></p></div><button class="supp-primary-action" id="supplementAction" type="button" hidden>上传补正材料</button><button class="secondary" id="secondaryBtn" type="button">返回我的登记</button></div></section>
 </aside></div>
 </div></main><script src="star-release-shell.js"></script><script src="../../supplement-store.js"></script><script src="supplement-free-upload.js"></script><script src="../../certificate-store.js"></script><script src="registration-status.js"></script><script>
 (()=>{
@@ -56,9 +56,13 @@ function render(key){
   document.getElementById('statusDesc').textContent=view.desc||c.desc;
   document.getElementById('sideDesc').textContent=view.desc||c.side;
   document.getElementById('statusLine').className='status-line status-'+
-    (view.kind==='needs_upload'||view.kind==='awaiting_notice'?'warning':
+    (view.kind==='needs_upload'||view.kind==='self_correction'?'warning':
       view.kind==='delivered'?'success':isSupplement||view.kind==='certificate_pending'?'normal':c.tone);
-  document.getElementById('actionBody').classList.add('no-primary');
+  const showUpload=['needs_upload','self_correction'].includes(view.kind);
+  const uploadAction=document.getElementById('supplementAction');
+  uploadAction.hidden=!showUpload;
+  uploadAction.textContent=view.kind==='self_correction'?'上传补正材料':'按要求补充材料';
+  document.getElementById('actionBody').classList.toggle('no-primary',!showUpload);
   document.getElementById('acceptedAt').textContent=c.accepted?'2026-08-27 10:18':'—';
 
   notice.className='notice';
@@ -67,9 +71,9 @@ function render(key){
     noticeText.textContent=view.sourceText+'：'+view.desc;
   }else if(view.kind==='reviewing'||view.kind==='awaiting_official'){
     noticeText.textContent=view.sourceText+'：'+view.desc;
-  }else if(view.kind==='awaiting_notice'){
+  }else if(view.kind==='self_correction'){
     notice.classList.add('warning');
-    noticeText.textContent='补证说明尚未发布，当前无需上传材料。请关注登记详情中的补证通知。';
+    noticeText.textContent='申请处于待补正阶段，尚无后台指定的补证清单。你可以先补充证件及相关附件，选择对应类型并提交平台复核。';
   }else if(view.kind==='delivered'){
     notice.classList.add('success');
     noticeText.textContent='电子登记证书已发放，可在下方查看或下载原始 PNG。';
@@ -79,7 +83,7 @@ function render(key){
     noticeText.textContent='办理时限说明：自正式受理之日起按登记机构的办理期限计算；补正材料所需时间不计入办理期限。';
   }
 
-  const officialIndex=isSupplement&&view.task?.source==='official'?1:c.official;
+  const officialIndex=(view.kind==='self_correction'||isSupplement&&view.task?.source==='official')?1:c.official;
   const progressIndex=stageIndex(configs[view.kind==='delivered'||view.kind==='certificate_pending'?'issued':key]||c);
   document.getElementById('progress').innerHTML=stages.map((name,i)=>
     '<div class="step '+(progressIndex>i?'done':progressIndex===i?'active':'')+'">'+name+'</div>').join('');
@@ -97,9 +101,9 @@ function render(key){
     dt.textContent=view.label;
     dd.textContent=view.kind==='needs_upload'?'请根据本次补证说明上传材料；提交后由平台复核。':
       view.kind==='reviewing'?'材料已提交，等待平台复核结果。':'平台复核已通过，等待工作人员确认转交官方。';
-  }else if(view.kind==='awaiting_notice'){
-    dt.textContent='等待补证说明';
-    dd.textContent='工作人员发布具体补证说明后，本页将开放对应的附件上传操作。';
+  }else if(view.kind==='self_correction'){
+    dt.textContent='待提交补正材料';
+    dd.textContent='可以自行上传证件和其他补正附件，提交后由后台复核并决定是否转交登记机构。';
   }else if(view.kind==='delivered'){
     dt.textContent='电子证书已发放';
     dd.textContent='登记办理已完成，可在下方直接预览或下载证书。';
@@ -115,8 +119,8 @@ function render(key){
   const events=[['付款并提交','2026-08-26 14:38','本次提交完成，生成独立申请 '+appNo]];
   if(isSupplement){
     view.task.events.slice().reverse().forEach(e=>events.unshift([e.label,e.at,e.detail||view.task.description||'']));
-  }else if(view.kind==='awaiting_notice'){
-    events.unshift(['待发布补证说明','—','工作人员尚未发布具体补证要求。']);
+  }else if(view.kind==='self_correction'){
+    events.unshift(['待补正','—','尚无指定补证清单，可自行上传并选择补充附件类型。']);
   }else if(view.kind==='delivered'){
     events.unshift(['电子证书已发放',view.delivered.deliveredAt||'—',
       '作品登记号：'+(view.delivered.regNumber||'—')+'；证书可在线查看和下载']);
@@ -150,11 +154,16 @@ const supplementPanel=document.getElementById('supplementPanel');
 function showSupplement(){
   const req=S.active(appNo),last=S.latest(appNo),view=State.resolve(appNo,currentStage());
   if(!req&&!last){
-    if(view.kind==='awaiting_notice'){
+    if(view.kind==='self_correction'){
       supplementPanel.hidden=false;
-      supplementPanel.innerHTML='<div class="supp-front-head"><div><strong>待发布补证说明</strong><p>工作人员尚未指定本次需要补充的材料</p></div>'+
-        '<span class="supp-front-tag">待通知</span></div><div class="supp-front-body">'+
-        '<div class="supp-front-note"><strong>补证操作</strong><p>具体补证说明发布后，你可以按说明上传指定附件，或自行上传并选择附件类型。当前暂无需要提交的文件。</p></div></div>';
+      supplementPanel.innerHTML='<div class="supp-front-head"><div><strong>待补正 · 上传材料</strong>'+
+        '<p>未收到指定附件清单，可自行选择附件类型上传</p></div>'+
+        '<span class="supp-front-tag">待补充</span></div><div class="supp-front-body">'+
+        '<div class="supp-front-note"><strong>补正提醒</strong><p>后台尚未发布具体补证要求。如已知需补充的内容，可以在下方上传。上传仅代表提交平台复核，不等于已转交登记机构。</p></div>'+
+        '<div id="suppFreeRoot"></div></div>';
+      window.CopyrightFreeSupplement.mount(document.getElementById('suppFreeRoot'),S,appNo,()=>{
+        refreshView();window.scrollTo({top:0,behavior:'smooth'});
+      },{standalone:true,workTitle:title});
     }else{
       supplementPanel.hidden=true;supplementPanel.innerHTML='';
     }
@@ -164,9 +173,9 @@ function showSupplement(){
   const record=req||last;
   const need=req?.status==='needs_upload',reviewing=req?.status==='reviewing',pendingOfficial=req?.status==='awaiting_official';
   const stateLabel=need?'待补充材料':reviewing?'材料审核中':pendingOfficial?'待提交官方':'补充材料已完成';
-  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+S.sourceText(record.source)+' · '+(record.selectionMode==='self'?'用户自行选择附件':record.items.length+' 项指定附件')+'</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
+  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+(record.initiatedBy==='customer'?'用户主动补正':S.sourceText(record.source))+' · '+(record.selectionMode==='self'?'用户自行选择附件':record.items.length+' 项指定附件')+'</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
   const explanation=String(record.description||record.officialNote||'').trim();
-  const explanationHTML=explanation?'<div class="supp-front-note"><strong>补证说明</strong><p>'+esc(explanation)+'</p></div>':'';
+  const explanationHTML=explanation?'<div class="supp-front-note"><strong>'+(record.initiatedBy==='customer'?'用户补充说明':'补证说明')+'</strong><p>'+esc(explanation)+'</p></div>':'';
 
   const items=record.items.map(item=>{
     const open=need&&!item.approved,approved=item.approved,finalName=item.replacement?.name;
@@ -281,6 +290,13 @@ document.getElementById('statusSelect').addEventListener('change',event=>{
   refreshView();
 });
 document.getElementById('secondaryBtn').onclick=()=>location.href='index.html';
+document.getElementById('supplementAction').onclick=()=>{
+  const panel=document.getElementById('supplementPanel');
+  if(panel.hidden)return;
+  panel.scrollIntoView({behavior:'smooth',block:'start'});
+  const first=panel.querySelector('input[type="file"],select');
+  if(first)setTimeout(()=>first.focus({preventScroll:true}),350);
+};
 window.addEventListener('storage',refreshView);
 window.addEventListener('copyright-supplement-updated',refreshView);
 window.addEventListener('copyright-certificate-updated',refreshView);
