@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Copyright Registration｜Prototype Workspace</title>
+<title>著作权登记 MVP｜产品原型工作区</title>
 <style>
 :root{--bg:#f4f6f9;--panel:#fff;--ink:#151a22;--muted:#76808d;--line:#e4e8ee;--brand:#1769e0;--star:#2448ff;--dark:#111827}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif}a{text-decoration:none;color:inherit}.wrap{max-width:1040px;margin:auto;padding:72px 24px}.badge{display:inline-flex;padding:7px 10px;border-radius:999px;background:#eaf2ff;color:#145fca;font-size:11px;font-weight:800;letter-spacing:.06em}.head{margin:18px 0 38px}.head h1{font-size:46px;line-height:1.08;letter-spacing:-.045em;margin:0 0 13px}.head p{margin:0;color:var(--muted);font-size:16px;line-height:1.7}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px;min-height:270px;display:flex;flex-direction:column;transition:.18s}.card:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(23,34,51,.08)}.card.star{border-color:#cdd6ff;background:#fff;overflow:hidden;position:relative}.card.star:after{content:"";position:absolute;right:0;top:0;bottom:0;width:34%;background:linear-gradient(135deg,#eef2ff,#f7f9ff);clip-path:polygon(28% 0,100% 0,100% 100%,0 100%);z-index:0}.card.dark{background:var(--dark);color:#fff;border-color:var(--dark)}.card-inner{position:relative;z-index:1}.kicker{font-size:11px;font-weight:800;color:var(--brand);letter-spacing:.08em}.star .kicker{color:var(--star)}.dark .kicker{color:#73a7ff}.card h2{font-size:28px;margin:15px 0 9px}.card p{font-size:14px;line-height:1.7;color:var(--muted);margin:0}.dark p{color:#a7afbc}.meta{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.pill{border-radius:999px;background:#f2f4f7;padding:7px 9px;font-size:11px;color:#626c78}.star .pill{background:#eef2ff;color:#314ed8}.dark .pill{background:#1e2938;color:#c3cad4}.go{margin-top:auto;font-size:13px;font-weight:800;color:var(--brand)}.star .go{color:var(--star)}.dark .go{color:#fff}.foot{margin-top:28px;color:#929aa5;font-size:12px}@media(max-width:720px){.wrap{padding:42px 18px}.head h1{font-size:36px}.grid{grid-template-columns:1fr}.card.star:after{display:none}}
 </style>
@@ -11,34 +11,27 @@
 <body>
 <main class="wrap">
   <span class="badge">COPYRIGHT REGISTRATION</span>
-  <div class="head"><h1>Prototype Workspace</h1><p>著作权登记产品原型工作区。完整版与 MVP 版本并行维护，可分别进入前台自助登记和 Admin 运营后台。</p></div>
+  <div class="head"><h1>著作权登记 MVP</h1><p>当前最新原型 · 录音制品登记 ¥39 / 次。包括用户自助登记、后台审核、文字补证、用户自行选择补充附件，以及证书批量上传与发放流程。</p></div>
   <div class="grid">
-    <a class="card star" href="frontend/star-release/index.html">
-      <div class="card-inner">
-        <div class="kicker">FULL · STAR RELEASE · FRONTEND</div><h2>完整版 · 前台原型</h2><p>面向星球发行用户的著作权自助登记流程，包含填写登记信息、签署授权、支付提交、我的登记、补证与证书查看等完整 Demo 链路。</p>
-        <div class="meta"><span class="pill">用户自助登记</span><span class="pill">录音 / 词曲</span><span class="pill">支付提交</span><span class="pill">补证 / 发证</span></div><div class="go">进入完整版前台 →</div>
-      </div>
-    </a>
-    <a class="card dark" href="admin/index.html">
-      <div class="card-inner">
-        <div class="kicker">FULL · ADMIN</div><h2>完整版 · 运营后台</h2><p>面向版权登记运营人员的管理后台，兼容历史批量登记与用户自助登记，覆盖登记申请、提交记录、支付关系及代理登记信息。</p>
-        <div class="meta"><span class="pill">登记申请</span><span class="pill">提交记录</span><span class="pill">批量登记兼容</span><span class="pill">代理登记信息</span></div><div class="go">进入完整版后台 →</div>
-      </div>
-    </a>
     <a class="card star" href="mvp/frontend/star-release/index.html">
       <div class="card-inner">
-        <div class="kicker">MVP · STAR RELEASE · FRONTEND</div><h2>MVP · 前台原型</h2><p>面向首期上线范围的精简登记流程，默认登记录音制品，固定服务费 ¥39，保留填写、授权、支付、提交与进度查询主链路。</p>
-        <div class="meta"><span class="pill">录音制品</span><span class="pill">¥39 / 次</span><span class="pill">单申请</span><span class="pill">MVP</span></div><div class="go">进入 MVP 前台 →</div>
+        <div class="kicker">用户端 · MVP</div><h2>自助登记前台</h2><p>录音制品登记、¥39 支付与提交、我的登记，以及补证说明、附件类型选择、重新上传、登记证书查询下载。</p>
+        <div class="meta"><span class="pill">¥39 / 次</span><span class="pill">我的登记</span><span class="pill">补充材料</span><span class="pill">证书下载</span></div><div class="go">进入用户端 →</div>
       </div>
     </a>
     <a class="card dark" href="mvp/admin/index.html">
       <div class="card-inner">
-        <div class="kicker">MVP · ADMIN</div><h2>MVP · 运营后台</h2><p>对应 MVP 登记流程的精简运营后台，仅围绕录音制品登记的申请、提交、支付与状态处理进行管理。</p>
-        <div class="meta"><span class="pill">录音制品</span><span class="pill">登记申请</span><span class="pill">提交记录</span><span class="pill">MVP</span></div><div class="go">进入 MVP 后台 →</div>
+        <div class="kicker">运营端 · MVP</div><h2>登记管理后台</h2><p>登记申请管理、官方作品登记号同步、文字型补证与指定附件补证、材料复核，以及批量证书上传与发放。</p>
+        <div class="meta"><span class="pill">登记申请</span><span class="pill">文字补证</span><span class="pill">材料复核</span><span class="pill">证书上传</span></div><div class="go">进入运营后台 →</div>
       </div>
     </a>
   </div>
-  <div class="foot">zeroooolu/copyright-registration · Static HTML Prototype Repository</div>
+  <div class="foot">快捷入口：
+<a href="mvp/admin/pages/registration-applications.html" style="color:#1769e0;margin-right:15px">登记申请列表</a>
+<a href="mvp/admin/pages/registration-application-detail.html?id=CR202608250001" style="color:#1769e0;margin-right:15px">补证流程演示</a>
+<a href="mvp/admin/pages/certificate-upload.html" style="color:#1769e0">证书上传</a>
+<p style="line-height:1.6">当前页面默认进入 MVP，旧版 <code>frontend/</code> 与 <code>admin/</code> 代码仍保留在仓库，不受影响。前后台联动数据暂存在同一浏览器、同一域名中。</p>
+</div>
 </main>
 </body>
 </html>
