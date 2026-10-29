@@ -192,7 +192,7 @@ function showSupplement(){
   if(!need)return;
   if(free){
     window.CopyrightFreeSupplement.mount(document.getElementById('suppFreeRoot'),S,appNo,()=>{
-      showSupplement();window.scrollTo({top:0,behavior:'smooth'});
+      refreshView();window.scrollTo({top:0,behavior:'smooth'});
     });
     return;
   }
@@ -216,55 +216,75 @@ function showSupplement(){
   }));
   button.onclick=()=>{
     const files={};inputs.forEach(inp=>{files[inp.dataset.suppFile]=inp.files?.[0]});
-    try{S.submit(appNo,files);showSupplement();window.scrollTo({top:0,behavior:'smooth'})}
+    try{S.submit(appNo,files);refreshView();window.scrollTo({top:0,behavior:'smooth'})}
     catch(err){alert(err.message)}
   };
 }
 
 
-let certPreviewUrl=null;
+let certPreviewUrl=null,certificateRenderNumber=0;
 async function renderIssuedCertificate(){
-  const box=document.getElementById('certificatePanel');
-  const record=C.getDelivered(appNo),reg=C.getReg(appNo);
+  const run=++certificateRenderNumber,box=document.getElementById('certificatePanel');
+  const view=State.resolve(appNo,currentStage()),record=view.delivered,reg=C.getReg(appNo);
   document.getElementById('userRegNumber').textContent=reg?.number||record?.regNumber||'待获取';
   if(certPreviewUrl){URL.revokeObjectURL(certPreviewUrl);certPreviewUrl=null}
-  if(!record){box.hidden=true;return}
-  box.hidden=false;
-  // An actual delivered certificate always wins over prototype status selector.
-  if(!S.active(appNo)){
-    render('issued');
-    document.getElementById('statusSelect').disabled=true;
-    document.getElementById('sideDesc').textContent='登记已完成，作品登记证书现已发放，可在下方查看并下载 PNG 文件。';
-    document.getElementById('statusDesc').textContent='登记证书已发放，可以查看和下载。';
-    document.getElementById('notice').className='notice success';
-    document.getElementById('noticeText').textContent='电子登记证书已发放，请在下方查看或保存原始 PNG。';
+  if(view.kind==='certificate_pending'){
+    box.hidden=false;
+    box.innerHTML='<div class="cert-user-head"><div><strong>官方已发证 · 电子证书待发放</strong>'+
+      '<p>官方登记已完成，工作人员正在下载、上传并核对证书。发放后你可以直接在这里查看和下载。</p></div>'+
+      '<span class="cert-user-badge">待发放</span></div>'+
+      '<div class="cert-user-body"><div class="cert-user-info"><strong>电子登记证书</strong>'+
+      '<p>作品登记号：'+esc(reg?.number||'尚未同步')+'</p>'+
+      '<p>发放状态：尚未上传或尚未确认发放</p></div></div>';
+    return;
   }
-  box.innerHTML='<div class="cert-user-head"><div><strong>作品登记证书已发放</strong><p>证书现已关联本次申请，支持查看原始 PNG 和下载保存。</p></div><span class="cert-user-badge">已发放</span></div>'+
+  if(view.kind!=='delivered'||!record){box.hidden=true;box.innerHTML='';return}
+  box.hidden=false;
+  box.innerHTML='<div class="cert-user-head"><div><strong>作品登记证书已发放</strong><p>证书已关联当前登记申请，支持查看和下载原始 PNG。</p></div><span class="cert-user-badge">已发放</span></div>'+
     '<div class="cert-user-body"><div class="cert-user-main"><div class="cert-user-thumb" id="certUserThumb">PNG</div><div class="cert-user-info"><strong>'+esc(record.fileName)+'</strong>'+
     '<p>作品登记号：'+esc(record.regNumber)+'</p><p>发放时间：'+esc(record.deliveredAt||'—')+'</p></div></div>'+
     '<div class="cert-user-actions" id="certUserActions"></div>'+
-    '<div class="cert-user-note" id="certUserNote">电子证书文件以原始 PNG 为准；请妥善保管。</div></div>';
+    '<div class="cert-user-note" id="certUserNote">电子证书以原始 PNG 文件为准，请妥善保管。</div></div>';
   try{
     const blob=await C.getBlob(record.id);
+    if(run!==certificateRenderNumber)return;
     if(!blob){
-      document.getElementById('certUserNote').textContent='当前浏览器没有该证书文件。原型仅在上传时所在浏览器本地保存文件；真实系统接入后可跨设备下载。';
+      document.getElementById('certUserNote').textContent='当前浏览器无法读取证书 PNG。原型文件仅保存在上传证书的浏览器中，真实系统接入后将支持跨设备下载。';
       return;
     }
     certPreviewUrl=URL.createObjectURL(blob);
     const thumb=document.getElementById('certUserThumb'),actions=document.getElementById('certUserActions');
     if(thumb)thumb.innerHTML='<img src="'+certPreviewUrl+'" alt="作品登记证书">';
     if(actions){
-      const view=document.createElement('a');view.textContent='查看证书';view.href=certPreviewUrl;view.target='_blank';view.rel='noopener';
-      const download=document.createElement('a');download.textContent='下载 PNG';download.className='download';download.href=certPreviewUrl;download.download=record.fileName;
-      actions.append(view,download);
+      const viewLink=document.createElement('a');
+      viewLink.textContent='查看证书';viewLink.href=certPreviewUrl;viewLink.target='_blank';viewLink.rel='noopener';
+      const download=document.createElement('a');
+      download.textContent='下载 PNG';download.className='download';download.href=certPreviewUrl;download.download=record.fileName;
+      actions.append(viewLink,download);
     }
   }catch(err){
-    const hint=document.getElementById('certUserNote');if(hint)hint.textContent='加载原始 PNG 失败：'+err.message;
+    if(run!==certificateRenderNumber)return;
+    const hint=document.getElementById('certUserNote');
+    if(hint)hint.textContent='加载证书 PNG 失败：'+err.message;
   }
 }
-document.getElementById('statusSelect').addEventListener('change',event=>{const q=new URLSearchParams(location.search);q.set('status',event.target.value);history.replaceState(null,'','?'+q.toString());render(event.target.value);showSupplement()});document.getElementById('secondaryBtn').onclick=()=>location.href='index.html';render(S.active(appNo)?.triggerStatus||status);showSupplement();window.addEventListener('storage',()=>{showSupplement();renderCurrentMaterials()});window.addEventListener('copyright-supplement-updated',()=>{showSupplement();renderCurrentMaterials()});window.addEventListener('copyright-attachments-updated',renderCurrentMaterials);renderCurrentMaterials();
-window.addEventListener('copyright-certificate-updated',renderIssuedCertificate);
-window.addEventListener('storage',renderIssuedCertificate);
-renderIssuedCertificate();
+function refreshView(){
+  render(currentStage());
+  showSupplement();
+  renderIssuedCertificate();
+  renderCurrentMaterials();
+}
+document.getElementById('statusSelect').addEventListener('change',event=>{
+  const q=new URLSearchParams(location.search);
+  q.set('status',event.target.value);
+  history.replaceState(null,'','?'+q.toString());
+  refreshView();
+});
+document.getElementById('secondaryBtn').onclick=()=>location.href='index.html';
+window.addEventListener('storage',refreshView);
+window.addEventListener('copyright-supplement-updated',refreshView);
+window.addEventListener('copyright-certificate-updated',refreshView);
+window.addEventListener('copyright-attachments-updated',renderCurrentMaterials);
+refreshView();
 })();
 </script></body></html>
