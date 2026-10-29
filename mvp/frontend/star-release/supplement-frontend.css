@@ -46,3 +46,13 @@
 .supp-free-add{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px dashed #b8c8eb;border-radius:5px;color:#3c5dbe;background:#f8faff;font-size:12px;padding:10px 14px;margin-top:12px;cursor:pointer}
 .supp-free-add:disabled{opacity:.4;cursor:not-allowed}
 @media(max-width:920px){.supp-free-fields{grid-template-columns:1fr}}
+
+
+/* Pending-correction self-service upload CTA */
+.supp-primary-action{display:block;width:100%;min-height:40px;padding:10px 14px;border-radius:5px;border:1px solid #2448ff;background:#2448ff;color:white;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:9px}
+.supp-primary-action[hidden]{display:none!important}
+.supp-primary-action:hover{background:#1d3bcc}
+.supp-primary-action:focus-visible,.supp-free-add:focus-visible{outline:3px solid #bac9ff;outline-offset:2px}
+.supp-free-note-label{display:block;margin-top:15px;margin-bottom:7px;color:#65758b;font-size:12px;font-weight:500}
+.supp-free-note{width:100%;box-sizing:border-box;min-height:78px;padding:10px 12px;border:1px solid #cbd5e3;border-radius:5px;resize:vertical;font:inherit;font-size:12px;line-height:1.7;color:#46566c;background:#fff}
+.supp-free-note:focus-visible{outline:2px solid #8ca7fc;outline-offset:1px}
