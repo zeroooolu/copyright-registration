@@ -10,6 +10,10 @@
   };
   function resolve(appNo,stage){
     const S=global.CopyrightSupplement,C=global.CopyrightCertificate;
+    const last=S?.latest(appNo)||null;
+    if(stage==='pending_supplement'&&last?.status==='completed'){
+      stage=last.triggerStatus==='pending_supplement'?'pending_registration':last.triggerStatus||'pending_registration';
+    }
     const task=S?.active(appNo)||null;
     const delivered=C?.getDelivered(appNo)||null;
     const registration=C?.getReg(appNo)||null;
