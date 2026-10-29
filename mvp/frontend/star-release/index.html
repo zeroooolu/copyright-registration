@@ -26,65 +26,64 @@
 <tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">晴</div><div class="work-copy"><div class="work-title">晴天</div><div class="work-artist">作品名称：晴天 · 周杰伦 · 叶惠美</div></div></div></td><td><span class="status action"><i class="status-dot"></i>待付款</span></td><td><span class="date">尚未提交</span></td><td><a class="action-link" href="../payment-center-checkout.html?source=copyright&title=%E6%99%B4%E5%A4%A9&registration_name=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6&album=%E5%8F%B6%E6%83%A0%E7%BE%8E&cover=%E6%99%B4&order_total=39&submission_no=CRSUB202608260001">去付款</a></td></tr>
 <tr><td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#bf7b5e,#e0a070)">稻</div><div class="work-copy"><div class="work-title">稻香</div><div class="work-artist">作品名称：稻香 · 周杰伦 · 魔杰座</div></div></div></td><td><span class="status draft"><i class="status-dot"></i>草稿</span></td><td><span class="date">尚未提交</span></td><td><a class="action-link" href="registration-step1.html?title=%E7%A8%BB%E9%A6%99&registration_name=%E7%A8%BB%E9%A6%99&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6&album=%E9%AD%94%E6%9D%B0%E5%BA%A7&cover=%E7%A8%BB">继续填写</a></td></tr>
 </tbody></table><div class="records-footer"><span>共 5 条记录</span><div class="pager"><button class="page-btn">‹</button><button class="page-btn active">1</button><button class="page-btn">›</button></div></div></section>
-</div></main><div class="toast" id="toast"></div><script src="../../supplement-store.js"></script><script src="../../certificate-store.js"></script><script src="star-release-shell.js"></script><script>
+</div></main><div class="toast" id="toast"></div><script src="../../supplement-store.js"></script><script src="../../certificate-store.js"></script><script src="registration-status.js"></script><script src="star-release-shell.js"></script><script>
 (()=>{const input=document.getElementById('songSearch'),dropdown=document.getElementById('searchDropdown'),selected=document.getElementById('selectedSong'),selectedName=document.getElementById('selectedName'),selectedArtist=document.getElementById('selectedArtist'),selectedCover=selected.querySelector('.selected-cover'),clear=document.getElementById('clearSong'),continueBtn=document.getElementById('continueBtn'),toast=document.getElementById('toast'),results=[...document.querySelectorAll('.search-result')],verifyItem=document.getElementById('verifyItem'),contractItem=document.getElementById('contractItem');let verified=false,contracted=false;const showToast=m=>{toast.textContent=m;toast.classList.add('show');clearTimeout(showToast.t);showToast.t=setTimeout(()=>toast.classList.remove('show'),1500)},update=()=>{continueBtn.disabled=!(selected.classList.contains('show')&&verified&&contracted)},complete=(item,label)=>{item.classList.add('done');item.querySelector('.prereq-icon').textContent='✓';item.querySelector('.prereq-state').textContent='已完成';showToast(label+'已完成');update()};document.getElementById('verifyBtn').onclick=()=>{verified=true;complete(verifyItem,'实名认证')};document.getElementById('contractBtn').onclick=()=>{contracted=true;complete(contractItem,'合同签约')};const show=()=>{if(!selected.classList.contains('show'))dropdown.classList.add('show')};input.onfocus=show;input.onclick=show;input.oninput=()=>{const q=input.value.trim().toLowerCase();results.forEach(r=>r.style.display=!q||(r.dataset.name+' '+r.dataset.artist+' '+r.dataset.album).toLowerCase().includes(q)?'flex':'none');show()};results.forEach(r=>r.onclick=()=>{selectedName.textContent=r.dataset.name;selectedArtist.textContent=r.dataset.artist+' · '+r.dataset.album;selectedCover.textContent=r.dataset.cover;selectedCover.style.background=r.dataset.bg;input.style.display='none';selected.classList.add('show');dropdown.classList.remove('show');update()});clear.onclick=e=>{e.stopPropagation();selected.classList.remove('show');input.style.display='block';input.value='';update();input.focus()};continueBtn.onclick=()=>{if(!continueBtn.disabled)showToast('前置条件已满足，进入登记信息填写')};document.addEventListener('click',e=>{if(!e.target.closest('.search-wrap'))dropdown.classList.remove('show')});update()})();
 
 ;(()=>{
-  const S=window.CopyrightSupplement,C=window.CopyrightCertificate;
+  const S=window.CopyrightSupplement,C=window.CopyrightCertificate,State=window.CopyrightRegistrationStatus;
   const tbody=document.querySelector('.record-table tbody'),card=document.querySelector('.records-card');
   const E=S.escapeHTML;
   const banner=document.createElement('div');
   banner.className='supp-task-banner';banner.hidden=true;
   card?.before(banner);
+  function taskLink(r){
+    const title=r.workTitle||'登记申请';
+    const query=new URLSearchParams({app_no:r.appNo,title,registration_name:title,status:r.triggerStatus||'pending_accept'});
+    return 'registration-detail.html?'+query.toString();
+  }
   function sync(){
     tbody.querySelectorAll('[data-supp-dynamic]').forEach(row=>row.remove());
     const known=new Set([...tbody.querySelectorAll('a.action-link')].map(a=>new URL(a.href).searchParams.get('app_no')));
-    const tasks=S.customerTasks();
-    tasks.forEach(r=>{
+    const records=S.customerRecords();
+    records.forEach(r=>{
       if(known.has(r.appNo))return;
-      const title=r.workTitle||'登记申请';
-      const query=new URLSearchParams({app_no:r.appNo,title,registration_name:title,status:r.triggerStatus||'pending_accept'});
+      const title=r.workTitle||'登记申请',link=taskLink(r);
       const row=document.createElement('tr');
       row.dataset.suppDynamic='1';
       row.innerHTML='<td><div class="work-cell"><div class="work-cover" style="background:linear-gradient(135deg,#6476ea,#9b78d5)">'+E(title.slice(0,1))+'</div>'+
-        '<div class="work-copy"><div class="work-title">'+E(title)+'</div><div class="work-artist">申请编号：'+E(r.appNo)+' · 补充材料处理中</div></div></div></td>'+
-        '<td><span class="status action"><i class="status-dot"></i>待补充材料</span></td><td><span class="date">'+E(r.createdAt)+'</span></td>'+
-        '<td><a class="action-link" href="registration-detail.html?'+query.toString()+'">查看详情</a></td>';
+        '<div class="work-copy"><div class="work-title">'+E(title)+'</div><div class="work-artist">申请编号：'+E(r.appNo)+'</div></div></div></td>'+
+        '<td><span class="status processing"><i class="status-dot"></i>办理中</span></td><td><span class="date">'+E(r.createdAt)+'</span></td>'+
+        '<td><a class="action-link" href="'+link+'">查看详情</a></td>';
       tbody.prepend(row);
     });
     tbody.querySelectorAll('tr').forEach(row=>{
       const link=row.querySelector('.action-link'),status=row.querySelector('.status');
       if(!link||!status||!link.getAttribute('href')?.includes('registration-detail.html'))return;
-      const appNo=new URL(link.href).searchParams.get('app_no'),req=appNo&&S.active(appNo);
+      const p=new URL(link.href).searchParams,appNo=p.get('app_no'),stage=p.get('status')||'pending_accept';
       if(!status.dataset.baseText){
         status.dataset.baseText=status.textContent.trim();
         status.dataset.baseClass=status.className;
         link.dataset.baseAction=link.textContent;
       }
-      const cert=appNo&&C.getDelivered(appNo);
-      if(cert){
-        status.innerHTML='<i class="status-dot"></i>已发证 · 可下载';
-        status.className='status done';
-        link.textContent='查看证书';
-      }else if(req){
-        const label=req.status==='needs_upload'?'待补充材料':req.status==='reviewing'?'材料审核中':'待提交官方';
-        status.innerHTML='<i class="status-dot"></i>'+label;
-        status.className=req.status==='needs_upload'?'status action':'status processing';
-        link.textContent=req.status==='needs_upload'?'补充材料':'查看详情';
-      }else{
-        status.innerHTML='<i class="status-dot"></i>'+status.dataset.baseText;
+      const view=State.resolve(appNo,stage);
+      if(view.kind==='standard'){
+        status.innerHTML='<i class="status-dot"></i>'+E(view.label);
         status.className=status.dataset.baseClass;
         link.textContent=link.dataset.baseAction;
+      }else{
+        status.innerHTML='<i class="status-dot"></i>'+E(view.listLabel);
+        status.className=['needs_upload','awaiting_notice'].includes(view.kind)?'status action':
+          view.kind==='delivered'?'status done':'status processing';
+        link.textContent=view.action;
       }
     });
-    const waiting=tasks.filter(x=>x.status==='needs_upload');
+    const waiting=S.customerTasks().filter(x=>x.status==='needs_upload');
     banner.hidden=!waiting.length;
     if(waiting.length){
-      const first=waiting[0],title=first.workTitle||'登记申请';
-      const query=new URLSearchParams({app_no:first.appNo,title,registration_name:title,status:first.triggerStatus||'pending_accept'});
+      const first=waiting[0];
       banner.innerHTML='<div><strong>有 '+waiting.length+' 条登记申请需要补充材料</strong>'+
         '<span>请根据补证说明上传材料，以便继续办理登记。</span></div>'+
-        '<a href="registration-detail.html?'+query.toString()+'">前往补充</a>';
+        '<a href="'+taskLink(first)+'">前往补充</a>';
     }
     const totalLabel=document.querySelector('.records-footer > span');
     if(totalLabel)totalLabel.textContent='共 '+tbody.querySelectorAll('tr').length+' 条记录';
