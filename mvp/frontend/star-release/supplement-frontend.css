@@ -53,6 +53,3 @@
 .supp-primary-action[hidden]{display:none!important}
 .supp-primary-action:hover{background:#1d3bcc}
 .supp-primary-action:focus-visible,.supp-free-add:focus-visible{outline:3px solid #bac9ff;outline-offset:2px}
-.supp-free-note-label{display:block;margin-top:15px;margin-bottom:7px;color:#65758b;font-size:12px;font-weight:500}
-.supp-free-note{width:100%;box-sizing:border-box;min-height:78px;padding:10px 12px;border:1px solid #cbd5e3;border-radius:5px;resize:vertical;font:inherit;font-size:12px;line-height:1.7;color:#46566c;background:#fff}
-.supp-free-note:focus-visible{outline:2px solid #8ca7fc;outline-offset:1px}
