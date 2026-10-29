@@ -85,6 +85,42 @@
     };
     const records=all();records.push(record);save(records);return clone(record);
   }
+  // Customer-initiated correction when the official stage is already "pending_supplement"
+  // but no operator-issued supplement request has been created. File metadata only.
+  function submitCustomerCorrection(payload){
+    if(!payload?.appNo)throw new Error('缺少登记申请编号');
+    if(payload.stage!=='pending_supplement')throw new Error('仅待补正的申请可自主提交补充材料');
+    if(active(payload.appNo))throw new Error('当前已有材料补充任务，请按现有任务上传');
+    const choices=payload.files;
+    if(!Array.isArray(choices)||!choices.length)throw new Error('请至少上传一份补正附件');
+    if(choices.length>20)throw new Error('每次最多上传 20 份补正附件');
+    const note=String(payload.note||'').trim();
+    if(note.length>500)throw new Error('补充说明不能超过 500 字');
+    const timestamp=Date.now(),unique=timestamp.toString(36)+Math.random().toString(36).slice(2,5);
+    // Validate all files first, then write one complete request to avoid half-created tasks.
+    const items=choices.map((entry,i)=>{
+      if(!entry||!entry.key||entry.key==='other')throw new Error('请选择每份文件的附件类型');
+      validateAttachmentFile(entry.key,entry.file);
+      const material=MATERIALS.find(m=>m.key===entry.key),file=entry.file;
+      const fallback=entry.key==='audio'&&payload.workTitle?payload.workTitle+'.wav':material.file||'';
+      const current=getAttachment(payload.appNo,entry.key,fallback);
+      const meta={name:file.name,size:file.size||0,type:file.type||'',at:now()};
+      return {id:'SELF'+unique+i.toString(36),key:entry.key,name:material.name,
+        original:current.entries.map(x=>x.name).join('、'),mode:'append',reason:'other',requirement:'',
+        replacement:meta,approved:false,versions:[meta]};
+    });
+    const record={
+      id:'SUP'+unique.toUpperCase(),appNo:String(payload.appNo),workTitle:String(payload.workTitle||''),
+      appSource:'self',source:'official',initiatedBy:'customer',selectionMode:'self',
+      description:note,triggerStatus:'pending_supplement',status:'reviewing',
+      createdAtMs:timestamp,createdAt:now(),submittedAt:now(),operator:'用户主动提交',
+      items,events:[
+        event('用户提交补正材料',items.length+' 项附件待后台复核'),
+        event('用户主动补正','待补正阶段自行上传，未关联后台指定的补证清单')
+      ]
+    };
+    const records=all();records.push(record);save(records);return clone(record);
+  }
   function change(appNo,fn){
     const records=all(),idx=records.findIndex(x=>x.appNo===String(appNo)&&x.status!=='completed');
     if(idx<0)throw new Error('当前没有待处理的补充任务');
@@ -228,5 +264,5 @@
   const statusText=status=>({needs_upload:'待用户补充',reviewing:'待后台复核',awaiting_official:'待提交官方',completed:'已完成'})[status]||status;
   const sourceText=source=>source==='official'?'官方补正':'平台审核退回';
   const escapeHTML=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,customerTasks,customerRecords,create,submit,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile,attachmentId};
+  global.CopyrightSupplement={MATERIALS,TYPES,list,latest,active,customerTasks,customerRecords,create,submit,submitCustomerCorrection,review,markOfficial,statusText,sourceText,escapeHTML,getAttachment,commitAttachment,validateAttachmentFile,attachmentId};
 })(window);
