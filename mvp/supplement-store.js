@@ -99,7 +99,7 @@
     const timestamp=Date.now(),unique=timestamp.toString(36)+Math.random().toString(36).slice(2,5);
     // Validate all files first, then write one complete request to avoid half-created tasks.
     const items=choices.map((entry,i)=>{
-      if(!entry||!entry.key||entry.key==='other')throw new Error('请选择每份文件的附件类型');
+      if(!entry||!entry.key||['other','authorization'].includes(entry.key))throw new Error('请选择每份文件的附件类型');
       validateAttachmentFile(entry.key,entry.file);
       const material=MATERIALS.find(m=>m.key===entry.key),file=entry.file;
       const fallback=entry.key==='audio'&&payload.workTitle?payload.workTitle+'.wav':material.file||'';
@@ -135,7 +135,7 @@
         if(freeChoices.length>20)throw new Error('单次最多补充 20 份附件');
         const timestamp=Date.now().toString(36);
         const prepared=freeChoices.map((entry,i)=>{
-          if(!entry||entry.key==='other')throw new Error('请选择有效的附件类型');
+          if(!entry||['other','authorization'].includes(entry.key))throw new Error('请选择有效的附件类型');
           validateAttachmentFile(entry.key,entry.file);
           const material=MATERIALS.find(m=>m.key===entry.key),file=entry.file;
           const fallback=entry.key==='audio'&&r.workTitle?r.workTitle+'.wav':material.file||'';
