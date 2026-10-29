@@ -14,3 +14,7 @@
 .cert-user-actions a,.cert-user-actions button{height:35px;padding:0 17px;font-size:12px;border:1px solid #2448ff;color:#2448ff;border-radius:4px;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
 .cert-user-actions .download{background:#2448ff;color:white}
 .cert-user-note{color:#98a3b0;font-size:11px;line-height:1.65;margin-top:12px}
+
+.cert-user-head.pending{background:#f6f8ff;border-bottom-color:#e1e8fb}
+.cert-user-head.pending strong{color:#3a5da8}
+.cert-user-badge.pending{background:#e8efff;color:#4564a8}
