@@ -145,6 +145,23 @@
     item.appId=duplicatedFile?null:m.appId;
     const list=all();list.unshift(item);save(META_KEY,list);return copy(item);
   }
+  async function remove(id){
+    const record=getRecord(id);
+    if(!record)throw Error('未找到证书记录');
+    if(record.delivery==='delivered')throw Error('已发放的证书不可删除');
+    const d=await db();
+    try{
+      await new Promise((resolve,reject)=>{
+        const tx=d.transaction('png','readwrite');
+        tx.objectStore('png').delete(id);
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error||Error('删除证书文件失败'));
+      });
+    }finally{d.close()}
+    save(META_KEY,all().filter(x=>x.id!==id));
+    rematchAll();
+    return copy(record);
+  }
   function patch(id,changes){
     const items=all(),pos=items.findIndex(x=>x.id===id);if(pos<0)throw Error('未找到证书');
     if(items[pos].delivery==='delivered')throw Error('已发放证书不可直接修改，请走人工换证流程');
@@ -192,5 +209,5 @@
   const stats=()=>{const records=all();return {total:records.length,matched:records.filter(x=>x.matchStatus==='matched'&&x.delivery!=='delivered').length,
     exceptions:records.filter(x=>x.matchStatus!=='matched'&&x.delivery!=='delivered').length,delivered:records.filter(x=>x.delivery==='delivered').length}};
   global.CopyrightCertificate={applications,app,workIdFor,getReg,sync,bindManually,normalizeReg,extractReg,
-    match,all,getRecord,getDelivered,upload,patch,rematchAll,deliver,getBlob,stats,esc};
+    match,all,getRecord,getDelivered,upload,remove,patch,rematchAll,deliver,getBlob,stats,esc};
 })(window);
