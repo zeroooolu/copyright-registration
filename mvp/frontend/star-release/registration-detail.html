@@ -156,11 +156,10 @@ function showSupplement(){
   if(!req&&!last){
     if(view.kind==='self_correction'){
       supplementPanel.hidden=false;
-      supplementPanel.innerHTML='<div class="supp-front-head"><div><strong>待补正 · 上传材料</strong>'+
-        '<p>未收到指定附件清单，可自行选择附件类型上传</p></div>'+
-        '<span class="supp-front-tag">待补充</span></div><div class="supp-front-body">'+
-        '<div class="supp-front-note"><strong>补正提醒</strong><p>后台尚未发布具体补证要求。如已知需补充的内容，可以在下方上传。上传仅代表提交平台复核，不等于已转交登记机构。</p></div>'+
-        '<div id="suppFreeRoot"></div></div>';
+      supplementPanel.innerHTML='<div class="supp-front-head"><div><strong>补充材料</strong>'+
+        '<p>添加文件并选择附件类型</p></div>'+
+        '<span class="supp-front-tag">待提交</span></div>'+
+        '<div class="supp-front-body"><div id="suppFreeRoot"></div></div>';
       window.CopyrightFreeSupplement.mount(document.getElementById('suppFreeRoot'),S,appNo,()=>{
         refreshView();window.scrollTo({top:0,behavior:'smooth'});
       },{standalone:true,workTitle:title});
@@ -172,32 +171,54 @@ function showSupplement(){
   supplementPanel.hidden=false;
   const record=req||last;
   const need=req?.status==='needs_upload',reviewing=req?.status==='reviewing',pendingOfficial=req?.status==='awaiting_official';
+  const specified=(record.selectionMode==='specified'||(!record.selectionMode&&record.items.length>0));
+  const outstanding=record.items.filter(item=>!item.approved);
   const stateLabel=need?'待补充材料':reviewing?'材料审核中':pendingOfficial?'待提交官方':'补充材料已完成';
-  const intro='<div class="supp-front-head"><div><strong>'+stateLabel+'</strong><p>'+(record.initiatedBy==='customer'?'用户主动补正':S.sourceText(record.source))+' · '+(record.selectionMode==='self'?'用户自行选择附件':record.items.length+' 项指定附件')+'</p></div><span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
+  const source=record.initiatedBy==='customer'?'用户主动补正':S.sourceText(record.source);
+  const subtitle=need?(specified?'指定 '+outstanding.length+' 项附件，按项上传':'自行添加附件并选择类型'):
+    (specified?'指定 '+record.items.length+' 项附件':'共 '+record.items.length+' 份附件');
+  const intro='<div class="supp-front-head"><div><strong>'+(need?'补充材料':stateLabel)+'</strong>'+
+    '<p>'+esc(source)+' · '+esc(subtitle)+'</p></div>'+
+    '<span class="supp-front-tag">'+esc(S.statusText(record.status))+'</span></div>';
   const explanation=String(record.description||record.officialNote||'').trim();
-  const explanationHTML=explanation?'<div class="supp-front-note"><strong>'+(record.initiatedBy==='customer'?'用户补充说明':'补证说明')+'</strong><p>'+esc(explanation)+'</p></div>':'';
+  const explanationHTML=explanation?'<div class="supp-front-note"><strong>'+
+    (record.initiatedBy==='customer'?'用户补充记录':'补证要求')+'</strong><p>'+esc(explanation)+'</p></div>':'';
 
   const items=record.items.map(item=>{
     const open=need&&!item.approved,approved=item.approved,finalName=item.replacement?.name;
     let upload='';
     if(open){
-      const accept=S.MATERIALS.find(m=>m.key===item.key)?.accept||'';
+      const material=S.MATERIALS.find(m=>m.key===item.key),accept=material?.accept||'';
       const itemId=S.attachmentId(item);
-      upload='<div class="supp-front-upload"><label for="suppInput-'+esc(itemId)+'">'+(item.mode==='replace'?'重新选择文件':'补充上传文件')+' *</label><input id="suppInput-'+esc(itemId)+'" data-supp-file="'+esc(itemId)+'" data-supp-type="'+esc(item.key)+'" type="file" accept="'+esc(accept)+'"><small data-file-name="'+esc(itemId)+'">选择后将显示文件名称，确认无误再提交。</small></div>';
+      const formats=item.key==='audio'?'WAV / MP3 / FLAC / M4A':'PDF / JPG / PNG';
+      upload='<div class="supp-front-upload"><label for="suppInput-'+esc(itemId)+'">'+
+        (item.mode==='replace'?'重新上传':'上传文件')+'</label>'+
+        '<input id="suppInput-'+esc(itemId)+'" data-supp-file="'+esc(itemId)+
+        '" data-supp-type="'+esc(item.key)+'" type="file" accept="'+esc(accept)+'">'+
+        '<small data-file-name="'+esc(itemId)+'">'+formats+' · 最大 20 MB</small></div>';
     }
-    const badge=approved?'<span class="supp-front-item-badge done">本轮已通过</span>':'<span class="supp-front-item-badge">'+(open?'待上传':reviewing?'待复核':'已上传')+'</span>';
+    const badge=approved?'<span class="supp-front-item-badge done">已通过</span>':
+      '<span class="supp-front-item-badge">'+(open?'待上传':reviewing?'待审核':'已提交')+'</span>';
     const reason=S.TYPES.find(x=>x.value===item.reason)?.label||'';
-    const detail=item.requirement?'<p>'+esc(item.requirement)+'</p>':'';
-    return '<div class="supp-front-item"><div class="supp-front-item-head"><strong>'+esc(item.name)+'</strong>'+badge+'</div>'+
-      (record.selectionMode==='specified'&&item.reason&&item.reason!=='other'&&reason?'<div class="supp-front-type">'+esc(reason)+'</div>':'')+detail+
-      '<div class="supp-front-fileline">处理方式：'+(item.mode==='replace'?'替换原文件':'补充新附件')+' · 原文件：'+esc(item.original||'未上传')+'</div>'+
-      (finalName?'<div class="supp-front-fileline">最新提交：'+esc(finalName)+(item.versions.length>1?' · 共提交 '+item.versions.length+' 次':'')+'</div>':'')+upload+'</div>';
+    const details=item.requirement?'<p>'+esc(item.requirement)+'</p>':'';
+    const existing=item.mode==='replace'&&item.original?
+      '<div class="supp-front-fileline">原文件：'+esc(item.original)+'</div>':'';
+    const latest=finalName?'<div class="supp-front-fileline">已提交：'+esc(finalName)+
+      (item.versions.length>1?' · 第 '+item.versions.length+' 次上传':'')+'</div>':'';
+    return '<div class="supp-front-item"><div class="supp-front-item-head"><div class="supp-front-item-title">'+
+      '<strong>'+esc(item.name)+'</strong>'+
+      (specified?'<span class="supp-fixed-type">指定类型</span>':'')+
+      '</div>'+badge+'</div>'+
+      (specified&&item.reason&&item.reason!=='other'&&reason?'<div class="supp-front-type">'+esc(reason)+'</div>':'')+
+      details+existing+latest+upload+'</div>';
   }).join('');
   const free=need&&!record.items.length;
-  const footer=free?'':need?'<div class="supp-front-actions"><p id="suppFrontHint">请完成全部必补项后提交。</p><button type="button" id="suppFrontSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>':reviewing?'<div class="supp-front-note">已提交至看见音乐平台，工作人员复核后会更新状态。无需重复上传。</div>':pendingOfficial?'<div class="supp-front-note">材料已通过复核，工作人员将继续办理官方补正。用户无需操作。</div>':'<div class="supp-front-note">本次补充流程已完成，原登记申请继续办理。</div>';
-  const events='<div class="supp-front-activity">处理记录：'+record.events.map(evt=>esc(evt.at)+' · '+esc(evt.label)).join('　 /　 ')+'</div>';
+  const footer=free?'':need?'<div class="supp-front-actions"><p id="suppFrontHint">请选择 '+outstanding.length+' 份附件</p>'+
+    '<button type="button" id="suppFrontSubmit" class="supp-front-submit" disabled>提交补充材料</button></div>':
+    '<div class="supp-front-complete">'+(reviewing?'已提交，等待后台审核。':
+      pendingOfficial?'审核通过，等待提交官方。':'本次补充已完成。')+'</div>';
   supplementPanel.innerHTML=intro+'<div class="supp-front-body">'+explanationHTML+items+
-    (free?'<div id="suppFreeRoot"></div>':'')+footer+events+'</div>';
+    (free?'<div id="suppFreeRoot"></div>':'')+footer+'</div>';
   if(!need)return;
   if(free){
     window.CopyrightFreeSupplement.mount(document.getElementById('suppFreeRoot'),S,appNo,()=>{
@@ -216,11 +237,11 @@ function showSupplement(){
       catch(err){errors.push(err.message)}
     });
     button.disabled=chosen!==inputs.length||errors.length>0;
-    hint.textContent=errors[0]||'已选择 '+chosen+'/'+inputs.length+' 项必补附件';
+    hint.textContent=errors[0]||(chosen===inputs.length?'全部 '+chosen+' 项已选择':'已选 '+chosen+'/'+inputs.length+' 项');
   };
   inputs.forEach(inp=>inp.addEventListener('change',()=>{
     const file=inp.files?.[0],display=supplementPanel.querySelector('[data-file-name="'+inp.dataset.suppFile+'"]');
-    if(display)display.textContent=file?'已选择：'+file.name+'（'+(file.size/1024/1024).toFixed(2)+' MB）':'请上传文件';
+    if(display)display.textContent=file?file.name+' · '+(file.size/1024/1024).toFixed(2)+' MB':(inp.dataset.suppType==='audio'?'WAV / MP3 / FLAC / M4A':'PDF / JPG / PNG')+' · 最大 20 MB';
     valid();
   }));
   button.onclick=()=>{
