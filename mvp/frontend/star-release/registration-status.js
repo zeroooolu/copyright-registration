@@ -21,7 +21,7 @@
       const src=task.initiatedBy==='customer'?'用户主动补正':task.source==='official'?'官方补正':'平台审核退回';
       const modes={
         needs_upload:{kind:'needs_upload',label:'待补充材料',listLabel:'待补充材料',action:'补充材料',
-          desc:task.items.length?'请查看补证说明并按要求补充指定附件。':'请查看补证说明，自行添加附件并选择附件类型。'},
+          desc:task.items.length?'请按指定附件逐项上传。':'请按补证要求添加文件并选择类型。'},
         reviewing:{kind:'reviewing',label:'材料审核中',listLabel:'材料审核中',action:'查看进度',desc:'补充材料已提交，正在等待平台复核。'},
         awaiting_official:{kind:'awaiting_official',label:'待提交官方',listLabel:'待提交官方',action:'查看进度',desc:'材料已通过平台复核，等待工作人员转交登记机构。'}
       };
@@ -34,7 +34,7 @@
       desc:'官方登记已完成，电子证书尚未交付。平台上传并确认发放后可在此下载。',
       stage:'issued',task:null,delivered:null,registration};
     if(stage==='pending_supplement')return {kind:'self_correction',label:'待补证',listLabel:'待补证 · 可上传',action:'补充材料',
-      desc:'当前申请处于待补正阶段，可以自行补充证件及其他附件。尚无后台指定的补证清单，请按已知补正要求选择附件类型并提交。',
+      desc:'当前暂无指定附件，请添加补正文件并选择类型。',
       stage,task:null,delivered:null,registration};
     return {kind:'standard',label:stageLabels[stage]||stageLabels.pending_accept,
       listLabel:stageLabels[stage]||stageLabels.pending_accept,action:'查看详情',desc:'',
