@@ -28,9 +28,6 @@
 .supp-front-note strong{display:block;color:#465a7b;margin-bottom:7px;font-size:12px}
 .supp-front-note p{white-space:pre-wrap;font-size:12px;line-height:1.85;margin:0;overflow-wrap:anywhere;color:#55667e}
 .supp-front-type{font-size:11px;color:#9a631a;background:#fff3dd;border-radius:3px;padding:4px 8px;display:inline-flex;margin-bottom:8px}
-.supp-free-head{margin:0 0 14px}
-.supp-free-head strong{font-size:14px;color:#38495d}
-.supp-free-head p{font-size:12px;line-height:1.75;color:#7e8da0;margin:6px 0}
 .supp-free-rows{display:flex;flex-direction:column;gap:12px}
 .supp-free-row{border:1px solid #e0e6ef;border-radius:7px;background:#fdfdff;padding:14px}
 .supp-free-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
@@ -53,3 +50,20 @@
 .supp-primary-action[hidden]{display:none!important}
 .supp-primary-action:hover{background:#1d3bcc}
 .supp-primary-action:focus-visible,.supp-free-add:focus-visible{outline:3px solid #bac9ff;outline-offset:2px}
+
+/* Compact, fixed-type supplement upload cards */
+.supp-front-head{padding:15px 20px}
+.supp-front-head p{margin-top:4px}
+.supp-front-body{padding:15px 20px 18px}
+.supp-front-note{padding:11px 13px;margin-bottom:14px}
+.supp-front-note strong{margin-bottom:4px}
+.supp-front-item{padding:13px 15px;margin-bottom:10px}
+.supp-front-item-head{margin-bottom:7px}
+.supp-front-item-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.supp-fixed-type{display:inline-flex;align-items:center;color:#63748c;background:#f0f3f9;border:1px solid #e3e8f0;border-radius:3px;padding:2px 6px;font-size:10px;white-space:nowrap}
+.supp-front-upload{margin-top:10px;padding:10px 12px;gap:6px}
+.supp-front-upload small{line-height:1.5;overflow-wrap:anywhere}
+.supp-front-complete{color:#66788c;font-size:12px;line-height:1.7;margin-top:13px}
+.supp-free-row{padding:12px 14px}
+.supp-free-title{margin-bottom:10px}
+.supp-free-file-name:empty{display:none}
