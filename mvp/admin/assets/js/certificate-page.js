@@ -2,7 +2,7 @@
 (()=>{
 'use strict';
 const C=window.CopyrightCertificate,$=id=>document.getElementById(id),esc=C.esc;
-let selected=new Set(),current=null,previewUrl=null,ocrWorker=null,ocrLoader=null,processing=false,drawerReading=false;
+let selected=new Set(),current=null,chosenApp='',previewUrl=null,ocrWorker=null,ocrLoader=null,processing=false,drawerReading=false;
 const statusText=r=>{
  if(r.delivery==='delivered')return '已发放';
  if(r.matchStatus==='matched')return '待发放';
@@ -82,8 +82,8 @@ async function recognize(id){
  await loadOCR();
  if(!ocrWorker)ocrWorker=await window.Tesseract.createWorker('chi_sim+eng',1);
  const result=await ocrWorker.recognize(blob),text=result.data?.text||'';
- const detected=C.extractReg(text);
- C.patch(id,{ocrText:text,recognition:'ocr',regNumber:detected||record.regNumber});
+ const detected=C.extractReg(text),info=C.extractCertificateInfo(text,record.fileName);
+ C.patch(id,{ocrText:text,recognition:'ocr',regNumber:detected||record.regNumber,workName:info.workName||record.workName,owner:info.owner||record.owner});
  return detected;
 }
 async function processFiles(files){
@@ -103,7 +103,7 @@ async function processFiles(files){
    render();
    try{
     const number=await recognize(record.id);
-    if(!number)needsReview++;
+    if(!number||C.getRecord(record.id)?.matchStatus!=='matched')needsReview++;
    }catch(err){
     needsReview++;
     // A file-name registration number can still be retained for manual confirmation.
@@ -156,12 +156,13 @@ async function openDrawer(id){
  $('certDrawerTitle').textContent=record.fileName;
  $('certDrawerSubtitle').textContent=readonly?'发放时间：'+(record.deliveredAt||'—'):'核对登记号与申请信息';
  $('certReg').value=record.regNumber||'';
- $('certAppSelect').innerHTML='<option value="">选择登记申请</option>'+
-  C.applications.map(a=>'<option value="'+esc(a.id)+'">'+esc(a.id+' · '+a.work+' · '+a.owner)+'</option>').join('');
- $('certAppSelect').value=app?.id||'';
+ chosenApp=app?.id||'';
+ $('certAppSearch').value='';
+ $('certAppSearch').disabled=readonly;
+ showAppResults();
  $('certOCRResult').textContent='';
  describeMatch(record);
- $('certReg').disabled=readonly;$('certAppSelect').disabled=readonly;
+ $('certReg').disabled=readonly;
  $('certSave').disabled=readonly;$('certOCR').disabled=readonly;
  $('certDelete').disabled=readonly;
  $('certDeliver').disabled=readonly||!eligible(record);
@@ -180,14 +181,33 @@ $('certClose').onclick=closeDrawer;
 $('certOverlay').onclick=ev=>{if(ev.target===$('certOverlay'))closeDrawer()};
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&current)closeDrawer()});
 const modified=()=>{$('certDeliver').disabled=true};
-$('certReg').oninput=modified;$('certAppSelect').onchange=modified;
+$('certReg').oninput=modified;
+function showAppResults(){
+ const query=$('certAppSearch').value.trim(),matches=C.searchApplications(query);
+ const picked=C.app(chosenApp);
+ $('certSelectedApp').hidden=!picked;
+ $('certSelectedApp').textContent=picked?'已关联：'+picked.id+' · '+picked.work+' · '+picked.owner:'';
+ $('certAppResults').innerHTML=!query?'':matches.length?matches.map(a=>
+  '<button type="button" class="cert-app-option" data-app="'+esc(a.id)+'"><strong>'+esc(a.work)+
+  '</strong><small>'+esc(a.id)+' · '+esc(a.owner)+'</small></button>').join(''):
+  '<div class="cert-app-no-results">未找到相关登记申请</div>';
+}
+$('certAppSearch').oninput=showAppResults;
+$('certAppResults').onclick=event=>{
+ const option=event.target.closest('[data-app]');
+ if(!option)return;
+ chosenApp=option.dataset.app;
+ $('certAppSearch').value='';
+ showAppResults();
+ modified();
+};
 async function saveAndMatch(){
  if(!current)return;
  const record=C.getRecord(current);
  if(!record||record.delivery==='delivered')throw Error('当前证书不可修改');
  const reg=C.extractReg($('certReg').value);
  if(!reg)throw Error('请填写有效的作品登记号');
- const chosen=$('certAppSelect').value;
+ const chosen=chosenApp;
  if(chosen){
   const app=C.app(chosen);
   if(!app)throw Error('登记申请不存在');
