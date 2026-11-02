@@ -247,12 +247,16 @@ $('certOCR').onclick=async()=>{
 };
 $('certOpenImage').onclick=async()=>{
  if(!current)return;
- const blob=await C.getBlob(current);
- if(!blob){alert('证书文件不可用');return}
- const url=URL.createObjectURL(blob);
- const opened=window.open(url,'_blank','noopener');
- if(!opened){URL.revokeObjectURL(url);alert('新窗口被阻止，请允许此网站打开新窗口');return}
- setTimeout(()=>URL.revokeObjectURL(url),60000);
+ const tab=window.open('about:blank','_blank');
+ if(!tab){alert('新窗口被阻止，请允许此网站打开新窗口');return}
+ tab.opener=null;
+ try{
+  const blob=await C.getBlob(current);
+  if(!blob){tab.close();alert('证书文件不可用');return}
+  const url=URL.createObjectURL(blob);
+  tab.location.replace(url);
+  setTimeout(()=>URL.revokeObjectURL(url),120000);
+ }catch(err){tab.close();alert('打开证书失败：'+err.message)}
 };
 window.addEventListener('copyright-certificate-updated',render);
 window.addEventListener('storage',render);
