@@ -58,8 +58,12 @@
       <div class="cert-form-group"><label for="certReg">作品登记号</label>
         <input class="cert-input" id="certReg" placeholder="输入或核对证书上的登记号">
       </div>
-      <div class="cert-form-group"><label for="certAppSelect">关联登记申请</label>
-        <select id="certAppSelect" class="cert-input"><option value="">选择登记申请</option></select>
+      <div class="cert-form-group">
+        <label for="certAppSearch">关联登记申请</label>
+        <input id="certAppSearch" class="cert-input" type="search" autocomplete="off"
+          placeholder="搜索申请编号、作品名称或著作权人">
+        <div id="certAppResults" class="cert-app-results" aria-live="polite"></div>
+        <div id="certSelectedApp" class="cert-app-picked" hidden></div>
       </div>
       <div class="cert-match-info" id="certMatchInfo"></div>
       <div id="certOCRResult" class="cert-inline-status" role="status" aria-live="polite"></div>
