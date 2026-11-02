@@ -85,17 +85,74 @@
     rematchAll();
     return map[id];
   }
+  const normText=s=>String(s||'').normalize('NFKC').replace(/[\s\u3000]/g,'').toLowerCase();
+  function searchApplications(keyword,limit=12){
+    const words=String(keyword||'').normalize('NFKC').trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if(!words.length)return [];
+    return applications.filter(a=>{
+      const haystack=[a.id,a.work,a.owner,a.workId,getReg(a.id)?.number||''].join(' ').normalize('NFKC').toLowerCase();
+      return words.every(word=>haystack.includes(word));
+    }).slice(0,limit);
+  }
+  function extractCertificateInfo(ocrText,fileName=''){
+    const lines=String(ocrText||'').replace(/\r/g,'').split(/\n/).map(x=>x.trim()).filter(Boolean);
+    const getValue=labels=>{
+      for(let i=0;i<lines.length;i++){
+        const row=lines[i],pattern=new RegExp('^(?:'+labels+')[\\s　]*[：:﹕]?\\s*(.*)$','i');
+        const hit=row.match(pattern);
+        if(!hit)continue;
+        // Skip a label-only line only if the next one is not another labeled field.
+        const value=(hit[1]||'').trim()||((lines[i+1]&&!/^(?:作品|制品|著作权|作者|登记|发证|编号|类别)/.test(lines[i+1]))?lines[i+1].trim():'');
+        if(value)return value.split(/[，,；;|]/)[0].trim();
+      }
+      return '';
+    };
+    let workName=getValue('(?:作品|制品)(?:名称|名)|作品名称'),owner=getValue('(?:著作权人|版权所有人|权利人)');
+    // A filename is useful only if it unambiguously contains a known complete name.
+    const filename=normText(String(fileName||'').replace(/\.png$/i,''));
+    if(!workName){
+      const candidates=applications.filter(a=>a.work.length>=2&&filename.includes(normText(a.work)));
+      const titles=[...new Set(candidates.map(a=>a.work))];
+      if(titles.length===1)workName=titles[0];
+    }
+    if(!owner){
+      const candidates=applications.filter(a=>a.owner.length>=3&&filename.includes(normText(a.owner)));
+      const owners=[...new Set(candidates.map(a=>a.owner))];
+      if(owners.length===1)owner=owners[0];
+    }
+    return {workName,owner};
+  }
   function match(number,workName,owner){
     const n=normalizeReg(number);
-    if(!n)return {status:'unreadable',appId:null,reason:'未识别出作品登记号'};
-    const matches=Object.entries(regMap()).filter(([,v])=>normalizeReg(v.number)===n);
-    if(!matches.length)return {status:'unmatched',appId:null,reason:'尚无登记申请关联该作品登记号'};
-    if(matches.length!==1)return {status:'conflict',appId:null,reason:'作品登记号匹配到多条申请'};
-    const a=app(matches[0][0]);if(!a)return {status:'unmatched',appId:null,reason:'申请已不存在'};
-    const mismatches=[];
-    if(workName&&String(workName).trim()!==a.work)mismatches.push('作品名称不一致');
-    if(owner&&String(owner).trim()!==a.owner)mismatches.push('著作权人不一致');
-    return {status:mismatches.length?'review':'matched',appId:a.id,reason:mismatches.join('；')||'作品登记号唯一匹配'};
+    if(!n)return {status:'unreadable',appId:null,reason:'尚未识别到作品登记号'};
+    const mapped=Object.entries(regMap()).filter(([,v])=>normalizeReg(v.number)===n);
+    if(mapped.length!==1&&mapped.length>0)return {status:'conflict',appId:null,reason:'该登记号关联了多条申请'};
+    if(mapped.length===1){
+      const a=app(mapped[0][0]);
+      if(!a)return {status:'unmatched',appId:null,reason:'关联申请已不存在'};
+      const mismatches=[];
+      if(workName&&normText(workName)!==normText(a.work))mismatches.push('作品名称不一致');
+      if(owner&&normText(owner)!==normText(a.owner))mismatches.push('著作权人不一致');
+      return {status:mismatches.length?'review':'matched',appId:a.id,
+        reason:mismatches.join('；')||'按作品登记号自动匹配'};
+    }
+    // A new registration number can be associated automatically only if
+    // BOTH the work and rights holder are exact, and there is one candidate.
+    if(workName&&owner){
+      const matches=applications.filter(a=>normText(a.work)===normText(workName)&&normText(a.owner)===normText(owner));
+      if(matches.length===1){
+        const a=matches[0],previous=getReg(a.id);
+        if(previous&&normalizeReg(previous.number)!==n){
+          return {status:'conflict',appId:null,reason:'该申请已有不同的作品登记号'};
+        }
+        if(getDelivered(a.id)){
+          return {status:'conflict',appId:null,reason:'该申请已发放证书'};
+        }
+        return {status:'matched',appId:a.id,reason:'按作品名称及著作权人自动匹配'};
+      }
+      if(matches.length>1)return {status:'review',appId:null,reason:'作品与著作权人对应多条申请，请人工核对'};
+    }
+    return {status:'unmatched',appId:null,reason:'未找到唯一匹配的申请，请搜索并手动关联'};
   }
   function db(){
     return new Promise((resolve,reject)=>{
@@ -135,11 +192,11 @@
     const duplicatedFile=hash&&all().find(r=>r.hash===hash);
     const id='CERT'+Date.now().toString(36).toUpperCase()+Math.random().toString(36).slice(2,6);
     await putBlob(id,file);
-    const fromFile=extractReg(file.name);
+    const fromFile=extractReg(file.name),info=extractCertificateInfo('',file.name);
     const item={id,fileName:file.name,fileSize:file.size,hash,createdAt:now(),regNumber:fromFile,
-      workName:'',owner:'',ocrText:'',recognition:fromFile?'filename':'pending',
+      workName:info.workName,owner:info.owner,ocrText:'',recognition:fromFile?'filename':'pending',
       matchStatus:'unreadable',matchReason:'待识别',appId:null,delivery:'pending',deliveredAt:null};
-    const m=match(item.regNumber);
+    const m=match(item.regNumber,item.workName,item.owner);
     item.matchStatus=duplicatedFile?'duplicate':m.status;
     item.matchReason=duplicatedFile?'PNG 文件内容重复上传':m.reason;
     item.appId=duplicatedFile?null:m.appId;
@@ -187,7 +244,7 @@
     if(changed)save(META_KEY,items);
   }
   function deliver(ids){
-    const list=all(),done=[],rejected=[];
+    const list=all(),registrations=regMap(),done=[],rejected=[];
     ids.forEach(id=>{
       const r=list.find(x=>x.id===id);
       if(!r){rejected.push({id,reason:'记录不存在'});return}
@@ -201,13 +258,17 @@
         rejected.push({id,reason:duplicate?'登记号重复':delivered?'该申请已有已发放证书':m.reason});return
       }
       r.matchStatus='matched';r.appId=m.appId;r.delivery='delivered';r.deliveredAt=now();r.deliveredBy='后台运营';
+      if(!registrations[m.appId]){
+        registrations[m.appId]={number:normalizeReg(r.regNumber),workId:app(m.appId)?.workId||'',
+          source:'certificate',syncedAt:now()};
+      }
       done.push(id);
     });
-    if(done.length)save(META_KEY,list);
+    if(done.length){save(REG_KEY,registrations);save(META_KEY,list)}
     return {done,rejected};
   }
   const stats=()=>{const records=all();return {total:records.length,matched:records.filter(x=>x.matchStatus==='matched'&&x.delivery!=='delivered').length,
     exceptions:records.filter(x=>x.matchStatus!=='matched'&&x.delivery!=='delivered').length,delivered:records.filter(x=>x.delivery==='delivered').length}};
   global.CopyrightCertificate={applications,app,workIdFor,getReg,sync,bindManually,normalizeReg,extractReg,
-    match,all,getRecord,getDelivered,upload,remove,patch,rematchAll,deliver,getBlob,stats,esc};
+    match,searchApplications,extractCertificateInfo,all,getRecord,getDelivered,upload,remove,patch,rematchAll,deliver,getBlob,stats,esc};
 })(window);
