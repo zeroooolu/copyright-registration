@@ -11,3 +11,5 @@
 .official-upload-table tbody tr:hover{background:#f8faff}
 .official-upload-table .file-link{font-weight:500}
 .official-upload-table .ra-tag{min-width:68px;justify-content:center;white-space:nowrap;font-weight:600}
+
+.official-upload-table th,.official-upload-table td{padding-left:12px;padding-right:12px}.official-upload-table th:last-child,.official-upload-table td:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}.official-upload-table td:last-child{color:#748294;font-size:11px}
