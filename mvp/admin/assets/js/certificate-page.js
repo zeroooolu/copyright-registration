@@ -2,6 +2,14 @@
 (()=>{
 'use strict';
 const C=window.CopyrightCertificate,$=id=>document.getElementById(id),esc=C.esc;
+const scopedAppId=new URLSearchParams(location.search).get('app_id'),scopedApp=C.app(scopedAppId);
+if(scopedApp){
+ $('certUploadTitle').textContent='上传当前申请证书';
+ document.querySelector('.cert-header h1').textContent='上传证书 · '+scopedApp.work;
+ document.querySelector('.cert-upload-panel .cert-muted').textContent=scopedApp.id+' · PNG · 单张 ≤ 20 MB';
+ $('certFiles').multiple=false;
+ const back=document.createElement('a');back.className='cert-btn';back.href='registration-application-detail.html?id='+encodeURIComponent(scopedApp.id);back.textContent='返回登记详情';document.querySelector('.cert-header').appendChild(back);
+}
 let selected=new Set(),current=null,chosenApp='',previewUrl=null,ocrWorker=null,ocrLoader=null,processing=false,drawerReading=false;
 const statusText=r=>{
  if(r.delivery==='delivered')return '已发放';
@@ -13,7 +21,7 @@ const statusText=r=>{
 };
 const badge=r=>r.delivery==='delivered'||r.matchStatus==='matched'?'success':
   ['duplicate','conflict'].includes(r.matchStatus)?'error':'warn';
-const eligible=r=>r.delivery!=='delivered'&&r.matchStatus==='matched';
+const eligible=r=>r.delivery!=='delivered'&&r.matchStatus==='matched'&&(!scopedApp||r.appId===scopedApp.id);
 function visibleRecords(){
  const filter=$('certFilter').value,q=$('certSearch').value.trim().toLowerCase();
  return C.all().filter(r=>{
@@ -89,6 +97,7 @@ async function recognize(id){
 async function processFiles(files){
  if(processing)return;
  if(!files.length)return;
+ if(scopedApp&&files.length>1){setProgress('当前申请每次只能上传一张证书');return}
  if(files.length>100){setProgress('每批最多上传 100 张 PNG');return}
  processing=true;
  $('chooseFiles').disabled=true;
@@ -111,6 +120,7 @@ async function processFiles(files){
     C.patch(record.id,{recognition:latest.regNumber?'filename':'unavailable'});
    }
    render();
+   if(scopedApp)await openDrawer(record.id);
   }
  }finally{
   processing=false;$('chooseFiles').disabled=false;
@@ -156,9 +166,9 @@ async function openDrawer(id){
  $('certDrawerTitle').textContent=record.fileName;
  $('certDrawerSubtitle').textContent=readonly?'发放时间：'+(record.deliveredAt||'—'):'核对登记号与申请信息';
  $('certReg').value=record.regNumber||'';
- chosenApp=app?.id||'';
+ chosenApp=app?.id||scopedApp?.id||'';
  $('certAppSearch').value='';
- $('certAppSearch').disabled=readonly;
+ $('certAppSearch').disabled=readonly||!!scopedApp;
  showAppResults();
  $('certOCRResult').textContent='';
  describeMatch(record);
@@ -205,6 +215,7 @@ async function saveAndMatch(){
  if(!current)return;
  const record=C.getRecord(current);
  if(!record||record.delivery==='delivered')throw Error('当前证书不可修改');
+ if(scopedApp&&chosenApp!==scopedApp.id)throw Error('只能关联当前登记申请');
  const reg=C.extractReg($('certReg').value);
  if(!reg)throw Error('请填写有效的作品登记号');
  const chosen=chosenApp;
@@ -232,6 +243,7 @@ $('certSave').onclick=async()=>{
 async function confirmDelivery(ids){
  if(!ids.length)return;
  const candidates=ids.map(id=>C.getRecord(id));
+ if(scopedApp&&candidates.some(r=>r?.appId!==scopedApp.id)){alert('只能发放当前登记申请的证书');return}
  if(candidates.some(r=>!r||!eligible(r))){alert('所选记录存在未匹配或已发放的证书，请重新选择');return}
  for(const id of ids){if(!(await C.getBlob(id))){alert('证书原图不存在，不能发放');return}}
  if(!confirm('确认向 '+ids.length+' 条登记申请发放证书？请确保登记号、作品名称、著作权人与原图一致。'))return;
@@ -239,6 +251,7 @@ async function confirmDelivery(ids){
  if(result.done.length)selected.clear();
  render();
  if(current&&C.getRecord(current))await openDrawer(current);
+ if(scopedApp&&result.done.length){location.href='registration-application-detail.html?id='+encodeURIComponent(scopedApp.id);return}
  alert('已发放 '+result.done.length+' 张'+(result.rejected.length?'，'+result.rejected.length+' 张未发放':''));
 }
 $('bulkDeliver').onclick=()=>confirmDelivery([...selected]);
@@ -278,6 +291,39 @@ $('certOpenImage').onclick=async()=>{
   setTimeout(()=>URL.revokeObjectURL(url),120000);
  }catch(err){tab.close();alert('打开证书失败：'+err.message)}
 };
+async function seedDemoRecords(){
+ const rows=[
+  {name:'待识别-证书.png',state:'unreadable'},
+  {name:'待核对-证书.png',state:'review'},
+  {name:'沪作登字-2026-S-00000026-蔷薇写给长街.png',state:'matched',app:'CR202608270026',reg:'沪作登字-2026-S-00000026'},
+  {name:'沪作登字-2025-S-03886487-关上世界的窗.png',state:'delivered',app:'CR202510150001',reg:'沪作登字-2025-S-03886487'},
+  {name:'重复登记号-示例.png',state:'duplicate',reg:'沪作登字-2025-S-03886487'}
+ ];
+ for(const item of rows){
+  if(C.all().some(record=>record.fileName===item.name))continue;
+  if(item.state==='delivered'&&C.getDelivered(item.app))continue;
+  try{
+  const canvas=document.createElement('canvas');canvas.width=720;canvas.height=960;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#fffdf8';ctx.fillRect(0,0,720,960);
+  ctx.strokeStyle='#b79b70';ctx.lineWidth=4;ctx.strokeRect(35,35,650,890);
+  ctx.fillStyle='#664b38';ctx.textAlign='center';ctx.font='bold 38px sans-serif';ctx.fillText('作品登记证书',360,170);
+  ctx.font='24px sans-serif';ctx.fillText(item.name.replace(/\.png$/,''),360,320);
+  ctx.fillStyle='#a66';ctx.fillText('原型示意 · 非正式证书',360,800);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!blob)continue;
+  const record=await C.upload(new File([blob],item.name,{type:'image/png'}));
+  if(item.state==='duplicate')C.patch(record.id,{regNumber:item.reg,recognition:'demo'});
+  if(item.state==='review')C.patch(record.id,{regNumber:'沪作登字-2026-S-12345678',workName:'待人工核对作品',owner:'待人工核对权利人',recognition:'demo'});
+  if(item.app){
+   C.bindManually(item.app,item.reg);
+   C.patch(record.id,{regNumber:item.reg,workName:C.app(item.app).work,owner:C.app(item.app).owner,recognition:'demo'});
+   if(item.state==='delivered')C.deliver([record.id]);
+  }
+  }catch(err){setProgress('部分示例记录加载失败：'+err.message)}
+ }
+ render();
+}
+seedDemoRecords().catch(err=>setProgress('示例记录加载失败：'+err.message));
 window.addEventListener('copyright-certificate-updated',render);
 window.addEventListener('storage',render);
 render();

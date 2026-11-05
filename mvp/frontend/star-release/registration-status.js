@@ -28,10 +28,12 @@
       const active=modes[task.status];
       if(active)return {...active,task,delivered,registration,stage:stage||task.triggerStatus,sourceText:src};
     }
-    if(delivered)return {kind:'delivered',label:'已发证',listLabel:'已发证 · 可下载',action:'查看证书',
+    if(stage==='completed')return {kind:'demo_completed',label:'已完成',listLabel:'已完成 · 可下载',action:'查看证书',
+      desc:'登记已完成，证书已上传，可在线预览和下载。',stage:'completed',task:null,delivered:null,registration};
+    if(delivered)return {kind:'delivered',label:'已完成',listLabel:'已完成 · 可下载',action:'查看证书',
       desc:'电子登记证书已发放，可在线查看和下载 PNG。',stage:'issued',task:null,delivered,registration};
     if(stage==='issued')return {kind:'certificate_pending',label:'已发证',listLabel:'已发证 · 待交付',action:'查看进度',
-      desc:'官方登记已完成，电子证书尚未交付。平台上传并确认发放后可在此下载。',
+      desc:'登记已完成，正在等待平台上传证书，预计 7 个工作日内完成上传。上传后可在此预览和下载。',
       stage:'issued',task:null,delivered:null,registration};
     if(stage==='pending_supplement')return {kind:'self_correction',label:'待补证',listLabel:'待补证 · 可上传',action:'补充材料',
       desc:'当前暂无指定附件，请添加补正文件并选择类型。',

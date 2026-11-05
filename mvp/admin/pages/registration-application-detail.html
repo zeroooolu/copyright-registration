@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>登记申请详情｜星球发行 · 著作权登记 Admin</title>
-<link rel="stylesheet" href="../assets/css/admin-common.css"><link rel="stylesheet" href="../assets/css/registration-admin.css"><link rel="stylesheet" href="../assets/css/supplement.css"><link rel="stylesheet" href="../assets/css/attachment-manager.css">
+<link rel="stylesheet" href="../assets/css/admin-common.css"><link rel="stylesheet" href="../assets/css/registration-admin.css?v=attachment-table-20261105"><link rel="stylesheet" href="../assets/css/supplement.css"><link rel="stylesheet" href="../assets/css/attachment-manager.css">
 </head>
 <body data-admin-page="applications" data-page-title="申请详情" data-page-parent="登记申请">
 <div id="admin-shell"></div>
 <template id="page-content">
-  <div class="detail-head"><div class="detail-title"><h1 id="title">晴天</h1><div class="detail-meta"><span>申请编号 <b id="appNo">CR202609030001</b></span><span>官方 WorkID <b id="regId">—</b></span><span>提交时间 <b id="submittedAt">2026-09-03 16:20:18</b></span><span>来源 <b id="sourceText">用户自助</b></span></div></div><div class="detail-actions"><a class="ra-btn" href="registration-applications.html">返回列表</a><a class="ra-btn" id="previewFront" target="_blank" rel="noopener">预览用户端</a><button class="ra-btn primary" id="requestBtn">发起材料补充</button></div></div>
+  <div class="detail-head"><div class="detail-title"><h1 id="title">晴天</h1><div class="detail-meta"><span>申请编号 <b id="appNo">CR202609030001</b></span><span>官方 WorkID <b id="regId">—</b></span><span>提交时间 <b id="submittedAt">2026-09-03 16:20:18</b></span><span>来源 <b id="sourceText">用户自助</b></span></div></div><div class="detail-actions"><a class="ra-btn" href="registration-applications.html">返回列表</a><a class="ra-btn" id="previewFront" target="_blank" rel="noopener">预览用户端</a><label class="ra-btn" style="display:flex;align-items:center;gap:6px">原型状态预览 <select id="adminStatusPreview" style="border:0;background:transparent;color:inherit"><option value="actual">实际状态</option><option value="issued">已发证</option><option value="completed">已完成</option></select></label><a class="ra-btn primary" id="headerUploadCert" hidden>上传证书</a><button class="ra-btn primary" id="requestBtn">发起材料补充</button></div></div>
   <div class="detail-grid"><div>
     <section class="detail-card self-only"><div class="detail-card-head"><strong>提交与支付关系</strong><span>用户自助登记新增</span></div><div class="detail-body"><div class="info-grid"><div class="info-row"><span class="k">本次提交编号</span><span class="v"><a class="ra-link" href="registration-submission-detail.html?id=CRSUB202609030001">CRSUB202609030001</a></span></div><div class="info-row"><span class="k">支付订单</span><span class="v">CRPAY202609030001</span></div><div class="info-row"><span class="k">本次提交项目</span><span class="v">录音制品</span></div><div class="info-row"><span class="k">支付状态</span><span class="v"><span class="ra-tag green">已支付</span></span></div></div><div class="payment-summary" style="margin-top:12px"><div class="metric"><span>本次提交服务费</span><strong>¥39.00</strong></div><div class="metric"><span>实际支付</span><strong>¥39.00</strong></div></div><div class="hint" style="margin-top:12px">本次提交仅生成一条录音制品登记申请，通过统一收银台支付 ¥39.00。</div></div></section>
 
@@ -25,10 +25,19 @@
   </div>
   <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:14px">
     <button type="button" class="ra-btn" id="detailSyncReg">获取 / 刷新登记号</button>
-    <a class="ra-btn" href="certificate-upload.html">进入证书上传</a>
-    <button type="button" class="ra-btn" id="detailViewCert" hidden>查看已发放 PNG</button>
-  </div><p id="certificateHint" class="supp-toolbar-note" style="margin-top:12px">正式接入后通过服务端调用官方 GetWorksRegNumber 接口。</p>
+    <a class="ra-btn" id="detailUploadCert" href="certificate-upload.html">上传当前申请证书</a>
+    <button type="button" class="ra-btn" id="detailViewCert" hidden>预览证书</button><a class="ra-btn" id="detailDownloadCert" hidden>下载证书</a>
+  </div><div id="demoCertificatePreview" hidden style="margin-top:14px;padding:20px;border:1px solid #e2e7ed;border-radius:6px;background:#fafbfc;text-align:center"><div style="display:inline-block;width:210px;min-height:280px;padding:22px;border:3px double #bb9a70;background:#fffdf7;color:#654b37"><strong style="font-size:18px">作品登记证书</strong><p style="margin-top:48px" id="demoCertTitle">作品名称</p><p>作品登记号：演示编号 2026-000001</p><p style="margin-top:55px;color:#a66">原型示意 · 非正式证书</p></div></div><p id="certificateHint" class="supp-toolbar-note" style="margin-top:12px">正式接入后通过服务端调用官方 GetWorksRegNumber 接口。</p>
 </div></section>
+    <section class="detail-card" aria-labelledby="officialAttachmentTitle"><div class="detail-card-head"><strong id="officialAttachmentTitle">附件上传状态</strong><span>版权局接口上传结果</span></div><div class="official-upload-body">
+      <div class="official-upload-scroll"><table class="official-upload-table"><colgroup><col style="width:36%"><col style="width:46%"><col style="width:18%"></colgroup><thead><tr><th scope="col">附件字段名称</th><th scope="col">附件文件</th><th scope="col">上传状态</th></tr></thead><tbody>
+        <tr><td>作品音频</td><td><span class="file-link" id="officialAudioFile">晴天.wav</span></td><td><span class="ra-tag green">上传成功</span></td></tr>
+        <tr><td>主体证明</td><td><span class="file-link">营业执照.jpg</span></td><td><span class="ra-tag green">上传成功</span></td></tr>
+        <tr><td>著作权登记授权委托协议</td><td><span class="file-link">著作权登记授权委托协议.pdf</span></td><td><span class="ra-tag red">上传失败</span></td></tr>
+        <tr><td>代理登记委托书</td><td><span class="file-link">代理登记委托书.pdf</span></td><td><span class="ra-tag green">上传成功</span></td></tr>
+        <tr><td>作品说明</td><td><span class="file-link" id="officialWorkDescription">晴天-作品说明.pdf</span></td><td><span class="ra-tag green">上传成功</span></td></tr>
+      </tbody></table></div>
+    </div></section>
     <section class="detail-card"><div class="detail-card-head"><strong>材料补充记录</strong><span>平台审核 / 官方补正</span></div><div class="detail-body" id="suppRecords"><div class="supp-empty">暂无补充任务</div></div></section>
     <section class="detail-card"><div class="detail-card-head"><strong>申请人信息</strong><span>代理登记申请主体</span></div><div class="detail-body"><div class="info-grid"><div class="info-row"><span class="k">申请人名称</span><span class="v" id="applicantName">看见音乐（上海）有限公司</span></div><div class="info-row"><span class="k">国家/区域</span><span class="v">中国</span></div><div class="info-row"><span class="k">通讯地址</span><span class="v">龙腾大道2879号3楼</span></div><div class="info-row"><span class="k">邮政编码</span><span class="v">200232</span></div><div class="info-row"><span class="k">联系人</span><span class="v">张三</span></div><div class="info-row"><span class="k">手机号</span><span class="v">138****8888</span></div><div class="info-row"><span class="k">座机号码</span><span class="v">021-63570107</span></div><div class="info-row"><span class="k">传真号码</span><span class="v">021-63570107</span></div><div class="info-row"><span class="k">邮箱</span><span class="v">copyright@example.com</span></div><div class="info-row"><span class="k">委托事项</span><span class="v">代理著作人提交权利登记</span></div></div></div></section>
 
@@ -74,6 +83,7 @@
   };
   const d=examples[id]||examples.CR202609030001;
   const $=x=>document.getElementById(x);
+  $('officialAudioFile').textContent=d[0]+'.wav';$('officialWorkDescription').textContent=d[0]+'-作品说明.pdf';
   $('title').textContent=d[0];$('workName').textContent=d[0];$('registrationName').textContent=d[0];
   $('appNo').textContent=id;$('regId').textContent=d[7];$('submittedAt').textContent=d[6];
   $('sourceText').textContent=d[5]==='self'?'用户自助':'后台批量';
@@ -85,6 +95,11 @@
   document.querySelectorAll('.legacy-only').forEach(n=>n.hidden=self);
   if(!self){document.querySelectorAll('.self-only').forEach(n=>n.style.display='none');document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='');}
   else document.querySelectorAll('.legacy-only').forEach(n=>n.style.display='none');
+  $('detailUploadCert').href='certificate-upload.html?app_id='+encodeURIComponent(id);
+  $('headerUploadCert').href=$('detailUploadCert').href;
+  const statusPreview=$('adminStatusPreview');
+  statusPreview.value=new URLSearchParams(location.search).get('preview')||'actual';
+  statusPreview.onchange=()=>{const params=new URLSearchParams(location.search);if(statusPreview.value==='actual')params.delete('preview');else params.set('preview',statusPreview.value);history.replaceState(null,'','?'+params);renderCertificate();render()};
   function renderCertificate(){
     const r=C.getReg(id),certificate=C.getDelivered(id),workId=C.workIdFor(id)||d[7];
     $('certificateWorkId').textContent=workId||'未取得';
@@ -93,22 +108,44 @@
     $('certificateDelivery').textContent=certificate?'已发放 · '+certificate.deliveredAt:
       C.all().some(x=>x.appId===id&&x.delivery!=='delivered')?'待确认发放':'未上传';
     $('detailViewCert').hidden=!certificate;
+    $('detailDownloadCert').hidden=!certificate;
+    $('detailUploadCert').hidden=!!certificate;
     $('detailSyncReg').disabled=!C.workIdFor(id);
     $('certificateHint').textContent=certificate?'登记证书已交付，可通过用户前台查看和下载。':
       !C.workIdFor(id)?'当前申请尚无官方 WorkID，不能调用作品登记号接口。':
       '本页为交互原型：同步操作使用演示接口结果。真实接口需服务端携带 access_token 调用。';
-    if(certificate){$('statusName').textContent='已发证'}
+    const demo=statusPreview.value;
+    $('headerUploadCert').hidden=!!certificate||!(demo==='issued'||demo==='actual'&&d[4]==='issued');
+    $('detailSyncReg').hidden=demo==='issued';
+    $('requestBtn').hidden=demo==='issued';
+    document.querySelectorAll('.supp-flag').forEach(button=>button.hidden=demo==='issued');
+    if(demo!=='actual'){
+      $('statusName').textContent=demo==='completed'?'已完成':'已发证';
+      $('certificateDelivery').textContent=demo==='completed'?'已上传 · 可预览下载':'等待平台上传 · 预计 7 个工作日';
+      $('detailUploadCert').hidden=demo==='completed';$('detailViewCert').hidden=demo!=='completed';$('detailDownloadCert').hidden=demo!=='completed';
+      $('demoCertificatePreview').hidden=demo!=='completed';$('demoCertTitle').textContent=d[0];
+      $('certificateHint').textContent=demo==='completed'?'证书已上传，可预览和下载。此处显示原型示意文件。':'登记已完成，等待平台上传证书，预计 7 个工作日内完成。';
+      $('detailViewCert').textContent='预览证书';$('detailDownloadCert').textContent='下载证书';
+    }else{$('demoCertificatePreview').hidden=true;$('statusName').textContent=certificate?'已完成':d[3]} 
   }
   $('detailSyncReg').onclick=()=>{
     const result=C.sync([id]);C.rematchAll();renderCertificate();
     alert(result[0]?.code==='success'?'模拟同步成功：'+result[0].number:result[0]?.message||'同步失败');
   };
   $('detailViewCert').onclick=async()=>{
+    if(statusPreview.value==='completed'){document.getElementById('demoCertificatePreview').scrollIntoView({behavior:'smooth',block:'center'});return}
     const cert=C.getDelivered(id);if(!cert)return;
     const blob=await C.getBlob(cert.id);
     if(!blob)return alert('当前浏览器未找到 PNG 文件，请在原上传浏览器查看。');
     const url=URL.createObjectURL(blob);window.open(url,'_blank','noopener');
     setTimeout(()=>URL.revokeObjectURL(url),60000);
+  };
+  $('detailDownloadCert').onclick=async event=>{
+    event.preventDefault();if(statusPreview.value==='completed'){alert('原型示意：证书下载入口');return}
+    const cert=C.getDelivered(id);if(!cert)return;
+    const blob=await C.getBlob(cert.id);if(!blob)return alert('当前浏览器未找到证书文件。');
+    const url=URL.createObjectURL(blob),link=document.createElement('a');
+    link.href=url;link.download=cert.fileName||'登记证书.png';link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
   };
   window.addEventListener('copyright-certificate-updated',renderCertificate);
   window.addEventListener('storage',renderCertificate);
@@ -165,9 +202,10 @@
   const render=()=>{
     const records=S.list(id),active=S.active(id),root=$('suppRecords');
     $('requestBtn').disabled=!!active||d[4]==='issued'||d[4]==='failed';
+    $('requestBtn').hidden=statusPreview.value==='issued';
     $('requestBtn').title=active?'需先完成当前补充任务':'';
-    flags.forEach(btn=>{btn.disabled=$('requestBtn').disabled;btn.textContent=active&&active.items.some(x=>x.key===btn.dataset.flag)?'补充任务中':'标记需补充'});
-    $('statusName').textContent=d[3];
+    flags.forEach(btn=>{btn.hidden=statusPreview.value==='issued';btn.disabled=$('requestBtn').disabled;btn.textContent=active&&active.items.some(x=>x.key===btn.dataset.flag)?'补充任务中':'标记需补充'});
+    $('statusName').textContent=statusPreview.value==='actual'?d[3]:statusPreview.value==='completed'?'已完成':'已发证';
     const statusDesc=document.querySelector('.status-panel .status-desc');
     statusDesc.textContent=active?'官方办理状态保持不变。当前材料补充任务：'+S.statusText(active.status)+'。':'当前申请材料按既有官方登记流程办理；历史材料补充任务可在左侧查看。';
     if(!records.length){root.innerHTML='<div class="supp-empty">暂无补充任务，可在上方发起材料补充，或点击附件旁的「标记需补充」。</div>';return}

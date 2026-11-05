@@ -14,7 +14,7 @@
 </style>
 </head>
 <body><aside class="sidebar"></aside><header class="topbar"></header><main class="workspace"><div class="page">
-<div class="page-head"><div class="head-left"><a href="index.html">← 返回我的登记</a><h1>登记详情</h1></div><div class="demo-switch"><span>原型状态预览</span><select id="statusSelect"><option value="pending_accept">待受理</option><option value="pending_supplement">待补证</option><option value="pending_registration">待登记</option><option value="pending_first_review">待初审</option><option value="pending_re_review">待复审</option><option value="pending_certificate">待制证</option><option value="issued">已发证</option></select></div></div>
+<div class="page-head"><div class="head-left"><a href="index.html">← 返回我的登记</a><h1>登记详情</h1></div><div class="demo-switch"><span>原型状态预览</span><select id="statusSelect"><option value="pending_accept">待受理</option><option value="pending_supplement">待补证</option><option value="pending_registration">待登记</option><option value="pending_first_review">待初审</option><option value="pending_re_review">待复审</option><option value="pending_certificate">待制证</option><option value="issued">已发证</option><option value="completed">已完成</option></select></div></div>
 <section class="hero"><div class="hero-top"><div class="work"><div class="cover" id="cover">青</div><div class="work-main"><div class="work-name" id="title">青花瓷</div><div class="work-meta" id="meta">周杰伦 · 我很忙</div><div class="chips"><span class="chip" id="typeChip">录音制品</span></div></div></div><div class="hero-status"><div class="status-line status-normal" id="statusLine"><i class="status-dot"></i><span class="status-name" id="statusName">待受理</span></div><div class="status-desc" id="statusDesc">申请已提交，正在等待登记机构受理。</div></div></div><div class="notice" id="notice"><div class="notice-icon">i</div><div id="noticeText"></div></div><div class="user-progress"><div class="progress-title"><strong>登记进度</strong><span>当前申请办理进度</span></div><div class="progress" id="progress"></div></div></section>
 <div class="layout"><div>
 <section class="card" id="supplementPanel" hidden aria-live="polite"></section><section class="card" id="certificatePanel" hidden aria-live="polite"></section>
@@ -33,7 +33,7 @@ const p=new URLSearchParams(location.search),status=p.get('status')||'pending_ac
 const money=n=>'¥'+Number(n).toFixed(2);
 document.getElementById('title').textContent=registrationName;document.getElementById('meta').textContent='作品名称：'+title+' · '+artist+' · '+album;document.getElementById('cover').textContent=cover;document.getElementById('typeChip').textContent='录音制品';document.getElementById('workName').textContent=title;document.getElementById('registrationName').textContent=registrationName;document.getElementById('registrationType').textContent='录音制品';document.getElementById('appNo').textContent=appNo;document.getElementById('appNoHead').textContent='申请编号：'+appNo;document.getElementById('submissionNo').textContent=submissionNo;document.getElementById('orderNoHead').textContent='支付订单：'+orderNo;document.getElementById('orderTotal').textContent=money(orderTotal);document.getElementById('paid').textContent=money(paid);
 document.getElementById('materials').innerHTML='<div class="kv"><span>授权委托协议</span><strong class="link">查看已签协议</strong></div><div class="kv"><span>作品音频</span><strong class="link">'+title+'.wav</strong></div><div class="kv"><span>主体证明</span><strong class="link">营业执照.jpg</strong></div><div class="kv"><span>作品信息</span><strong>已提交</strong></div>';
-const configs={pending_accept:{name:'待受理',desc:'申请已提交，正在等待登记机构受理。',tone:'normal',official:0,side:'材料已经提交，等待登记机构正式受理。'},pending_supplement:{name:'待补证',desc:'请根据最新补证说明补充材料。',tone:'warning',official:1,supplement:true,side:'补证说明将在登记详情中显示，发布后可在线补充材料。'},pending_registration:{name:'待登记',desc:'申请已受理，正在进入登记办理。',tone:'normal',official:2,accepted:true,side:'当前申请已受理，正在进行登记处理。'},pending_first_review:{name:'待初审',desc:'当前申请材料正在进行初审。',tone:'normal',official:3,accepted:true,side:'当前申请正在初审，无需你额外操作。'},pending_re_review:{name:'待复审',desc:'初审已完成，当前申请正在进行复审。',tone:'normal',official:4,accepted:true,side:'当前申请已进入复审阶段，无需你额外操作。'},pending_certificate:{name:'待制证',desc:'当前申请审核已通过，正在制作登记证书。',tone:'normal',official:5,accepted:true,side:'当前申请审核已完成，正在生成登记证书。'},issued:{name:'已发证',desc:'官方登记已完成，电子证书由平台确认发放。',tone:'success',official:6,accepted:true,issued:true,side:'发放后可在登记详情直接下载电子证书。'}};
+const configs={pending_accept:{name:'待受理',desc:'申请已提交，正在等待登记机构受理。',tone:'normal',official:0,side:'材料已经提交，等待登记机构正式受理。'},pending_supplement:{name:'待补证',desc:'请根据最新补证说明补充材料。',tone:'warning',official:1,supplement:true,side:'补证说明将在登记详情中显示，发布后可在线补充材料。'},pending_registration:{name:'待登记',desc:'申请已受理，正在进入登记办理。',tone:'normal',official:2,accepted:true,side:'当前申请已受理，正在进行登记处理。'},pending_first_review:{name:'待初审',desc:'当前申请材料正在进行初审。',tone:'normal',official:3,accepted:true,side:'当前申请正在初审，无需你额外操作。'},pending_re_review:{name:'待复审',desc:'初审已完成，当前申请正在进行复审。',tone:'normal',official:4,accepted:true,side:'当前申请已进入复审阶段，无需你额外操作。'},pending_certificate:{name:'待制证',desc:'当前申请审核已通过，正在制作登记证书。',tone:'normal',official:5,accepted:true,side:'当前申请审核已完成，正在生成登记证书。'},completed:{name:'已完成',desc:'登记已完成，证书已上传，可在线预览和下载。',tone:'success',official:6,accepted:true,issued:true,side:'电子登记证书可在下方预览和下载。'},issued:{name:'已发证',desc:'登记已完成，正在等待平台上传证书，预计 7 个工作日内完成上传。',tone:'success',official:6,accepted:true,issued:true,side:'证书上传后可在登记详情预览和下载。'}};
 const stages=['已提交','已受理','审核登记','制证','完成'],official=['待受理','待补证','待登记','待初审','待复审','待制证','已发证'];
 function stageIndex(c){if(c.name==='待受理')return 0;if(c.name==='待登记')return 1;if(['待补证','待初审','待复审'].includes(c.name))return 2;if(c.name==='待制证')return 3;return 4}
 function statusName(key){return (configs[key]||configs.pending_accept).name}
@@ -49,15 +49,15 @@ function render(key){
   const view=State.resolve(appNo,key),c=configs[view.stage]||configs.pending_accept;
   const notice=document.getElementById('notice'),noticeText=document.getElementById('noticeText');
   const isSupplement=['needs_upload','reviewing','awaiting_official'].includes(view.kind);
-  document.getElementById('statusSelect').value=view.delivered?'issued':key;
-  document.getElementById('statusSelect').disabled=!!view.task||!!view.delivered;
+  document.getElementById('statusSelect').value=key;
+  document.getElementById('statusSelect').disabled=!!view.task ;
   document.getElementById('statusName').textContent=view.label;
   document.getElementById('sideStatus').textContent=view.label;
   document.getElementById('statusDesc').textContent=view.desc||c.desc;
   document.getElementById('sideDesc').textContent=view.desc||c.side;
   document.getElementById('statusLine').className='status-line status-'+
     (view.kind==='needs_upload'||view.kind==='self_correction'?'warning':
-      view.kind==='delivered'?'success':isSupplement||view.kind==='certificate_pending'?'normal':c.tone);
+      ['delivered','demo_completed'].includes(view.kind)?'success':isSupplement||view.kind==='certificate_pending'?'normal':c.tone);
   const showUpload=['needs_upload','self_correction'].includes(view.kind);
   const uploadAction=document.getElementById('supplementAction');
   uploadAction.hidden=!showUpload;
@@ -74,11 +74,11 @@ function render(key){
   }else if(view.kind==='self_correction'){
     notice.classList.add('warning');
     noticeText.textContent='申请处于待补正阶段，尚无后台指定的补证清单。你可以先补充证件及相关附件，选择对应类型并提交平台复核。';
-  }else if(view.kind==='delivered'){
+  }else if(view.kind==='delivered'||view.kind==='demo_completed'){
     notice.classList.add('success');
-    noticeText.textContent='电子登记证书已发放，可在下方查看或下载原始 PNG。';
+    noticeText.textContent='登记已完成，证书可在下方预览和下载。';
   }else if(view.kind==='certificate_pending'){
-    noticeText.textContent='官方登记已完成，电子证书尚未交付。平台确认发放后可直接在线下载，无需联系邮箱领取。';
+    noticeText.textContent='登记已完成，正在等待平台上传证书，预计 7 个工作日内完成上传。';
   }else{
     noticeText.textContent='办理时限说明：自正式受理之日起按登记机构的办理期限计算；补正材料所需时间不计入办理期限。';
   }
@@ -104,12 +104,12 @@ function render(key){
   }else if(view.kind==='self_correction'){
     dt.textContent='待提交补正材料';
     dd.textContent='可以自行上传证件和其他补正附件，提交后由后台复核并决定是否转交登记机构。';
-  }else if(view.kind==='delivered'){
-    dt.textContent='电子证书已发放';
+  }else if(view.kind==='delivered'||view.kind==='demo_completed'){
+    dt.textContent='登记已完成，证书已上传';
     dd.textContent='登记办理已完成，可在下方直接预览或下载证书。';
   }else if(view.kind==='certificate_pending'){
-    dt.textContent='等待电子证书发放';
-    dd.textContent='官方已出证，待工作人员上传并确认发放电子证书。';
+    dt.textContent='等待平台上传证书';
+    dd.textContent='登记已完成，平台预计 7 个工作日内上传证书。';
   }else if(c.name==='待受理'){
     dt.textContent='等待正式受理';dd.textContent='办理期限从登记机构正式受理之日起计算。';
   }else{
@@ -121,11 +121,11 @@ function render(key){
     view.task.events.slice().reverse().forEach(e=>events.unshift([e.label,e.at,e.detail||view.task.description||'']));
   }else if(view.kind==='self_correction'){
     events.unshift(['待补正','—','尚无指定补证清单，可自行上传并选择补充附件类型。']);
-  }else if(view.kind==='delivered'){
-    events.unshift(['电子证书已发放',view.delivered.deliveredAt||'—',
-      '作品登记号：'+(view.delivered.regNumber||'—')+'；证书可在线查看和下载']);
+  }else if(view.kind==='delivered'||view.kind==='demo_completed'){
+    events.unshift(['登记已完成，证书已上传',view.delivered?.deliveredAt||'—',
+      '作品登记号：'+(view.delivered?.regNumber||'演示编号 2026-000001')+'；证书可在线查看和下载']);
   }else if(view.kind==='certificate_pending'){
-    events.unshift(['官方登记已完成','—','电子证书尚未交付，等待平台上传并确认发放。']);
+    events.unshift(['官方登记已完成','—','正在等待平台上传证书，预计 7 个工作日内完成。']);
   }else if(c.accepted){
     events.unshift(['申请已受理','2026-08-27 10:18','已进入登记机构办理流程']);
   }
@@ -260,17 +260,22 @@ async function renderIssuedCertificate(){
   if(certPreviewUrl){URL.revokeObjectURL(certPreviewUrl);certPreviewUrl=null}
   if(view.kind==='certificate_pending'){
     box.hidden=false;
-    box.innerHTML='<div class="cert-user-head pending"><div><strong>官方已发证 · 电子证书待发放</strong>'+
-      '<p>官方登记已完成，工作人员正在下载、上传并核对证书。发放后你可以直接在这里查看和下载。</p></div>'+
+    box.innerHTML='<div class="cert-user-head pending"><div><strong>登记已完成 · 等待上传证书</strong>'+
+      '<p>登记已完成，平台预计 7 个工作日内上传证书。上传后可在这里预览和下载。</p></div>'+
       '<span class="cert-user-badge pending">待发放</span></div>'+
       '<div class="cert-user-body"><div class="cert-user-info"><strong>电子登记证书</strong>'+
       '<p>作品登记号：'+esc(reg?.number||'尚未同步')+'</p>'+
       '<p>发放状态：尚未上传或尚未确认发放</p></div></div>';
     return;
   }
+  if(view.kind==='demo_completed'){
+    const svg='<svg xmlns="http://www.w3.org/2000/svg" width="660" height="900" viewBox="0 0 660 900"><rect width="660" height="900" fill="#fffdf8"/><rect x="35" y="35" width="590" height="830" fill="none" stroke="#c9a77a" stroke-width="3"/><text x="330" y="140" text-anchor="middle" font-size="35" fill="#8b5538">作品登记证书</text><text x="330" y="265" text-anchor="middle" font-size="22" fill="#374151">'+esc(registrationName)+'</text><text x="85" y="380" font-size="17" fill="#555">作品登记号：演示编号 2026-000001</text><text x="85" y="430" font-size="17" fill="#555">申请编号：'+esc(appNo)+'</text><text x="330" y="740" text-anchor="middle" font-size="25" fill="#bb7777">原型预览 · 非正式证书</text></svg>';
+    const url='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+    box.hidden=false;box.innerHTML='<div class="cert-user-head"><div><strong>登记已完成 · 证书已上传</strong><p>以下为原型证书示意，可预览和下载。</p></div><span class="cert-user-badge">已完成</span></div><div class="cert-user-body"><div class="cert-user-main"><div class="cert-user-thumb"><img src="'+url+'" alt="证书原型预览"></div><div class="cert-user-info"><strong>登记证书（原型示意）</strong><p>作品登记号：演示编号 2026-000001</p><p>证书状态：已上传</p></div></div><div class="cert-user-actions"><a href="'+url+'" target="_blank" rel="noopener">预览证书</a><a class="download" href="'+url+'" download="登记证书-原型示意.svg">下载证书</a></div><div class="cert-user-note">原型示意文件，仅用于查看已完成页面效果。</div></div>';return;
+  }
   if(view.kind!=='delivered'||!record){box.hidden=true;box.innerHTML='';return}
   box.hidden=false;
-  box.innerHTML='<div class="cert-user-head"><div><strong>作品登记证书已发放</strong><p>证书已关联当前登记申请，支持查看和下载原始 PNG。</p></div><span class="cert-user-badge">已发放</span></div>'+
+  box.innerHTML='<div class="cert-user-head"><div><strong>登记已完成 · 证书已上传</strong><p>证书已关联当前登记申请，支持查看和下载原始 PNG。</p></div><span class="cert-user-badge">已完成</span></div>'+
     '<div class="cert-user-body"><div class="cert-user-main"><div class="cert-user-thumb" id="certUserThumb">PNG</div><div class="cert-user-info"><strong>'+esc(record.fileName)+'</strong>'+
     '<p>作品登记号：'+esc(record.regNumber)+'</p><p>发放时间：'+esc(record.deliveredAt||'—')+'</p></div></div>'+
     '<div class="cert-user-actions" id="certUserActions"></div>'+
